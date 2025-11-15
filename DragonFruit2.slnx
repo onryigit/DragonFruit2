@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DragonFruit2/DragonFruit2.csproj" />
+  <Project Path="SampleConsoleApp/SampleConsoleApp.csproj" />
+</Solution>

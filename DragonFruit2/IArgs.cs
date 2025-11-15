@@ -1,0 +1,12 @@
+﻿using System.CommandLine;
+using System.Runtime.InteropServices;
+
+namespace DragonFruit2;
+
+public interface IArgs<T>
+{
+    public abstract static Command CreateCli();
+    public void SetParsedValues(ParseResult result);
+
+    public abstract static T Create(ParseResult parseResult); 
+}
