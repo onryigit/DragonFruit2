@@ -14,7 +14,7 @@ public class GeneratorTheoryTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var actual = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var actual = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.Equivalent(expected, actual);
     }
@@ -23,8 +23,7 @@ public class GeneratorTheoryTests
     [ClassData(typeof(CommandInfoTheoryData))]
     public async Task CreatesExpectedCommandOutput(string desc, string _, string __, CommandInfo commandInfo, string expected)
     {
-        var generator = new DragonFruit2Generator();
-        var actual = DragonFruit2.Generators.DragonFruit2Generator.GetSourceForCommandInfo(commandInfo);
+        var actual = DragonFruit2Builder.GetSourceForCommandInfo(commandInfo);
 
         Assert.Equal(expected, actual);
     }

@@ -14,6 +14,7 @@ public record class CommandInfo
     public string? NamespaceName { get; init; }
 
     public string? Description { get; init; }
+    public bool IsStruct { get; init; }
 
     public List<PropInfo> Arguments => field ??= [];
 

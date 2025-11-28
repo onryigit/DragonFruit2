@@ -14,6 +14,7 @@ public static class CommandInfoHelpers
             // TODO: Add description from attribute if present or XML docs
             Name = typeSymbol.Name,
             NamespaceName = typeSymbol.GetNamespace(),
+            IsStruct = typeSymbol.IsValueType,
         };
 
     /// <summary>

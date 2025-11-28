@@ -19,9 +19,10 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation( invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation( invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.Equal("MyArgs", commandInfo?.Name);
+        Assert.False(commandInfo?.IsStruct);
     }
 
     [Fact]
@@ -37,10 +38,10 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.Equal("MyArgs", commandInfo?.Name);
-
+        Assert.True(commandInfo?.IsStruct);
     }
 
     [Fact]
@@ -59,7 +60,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Equal("MyNamespace", commandInfo?.NamespaceName);
@@ -79,7 +80,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Equal("MyNamespace", commandInfo?.NamespaceName);
@@ -102,7 +103,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -126,7 +127,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Empty(commandInfo.Options);
@@ -150,7 +151,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -173,7 +174,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -196,7 +197,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -220,7 +221,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -244,7 +245,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -269,7 +270,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -292,7 +293,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -315,7 +316,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -338,7 +339,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -361,7 +362,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -384,7 +385,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
@@ -408,7 +409,7 @@ public class CommandInfoBuildingTests
         var invocations = TestHelpers.GetParseArgsInvocations(programTree);
         Assert.Single(invocations);
 
-        var commandInfo = DragonFruit2Generator.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
+        var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
