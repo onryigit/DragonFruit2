@@ -1,9 +1,8 @@
-﻿using System.CommandLine;
-using System.IO;
+﻿using DragonFruit2.Common;
 
 namespace DragonFruit2;
 
-public static class Command
+public static class Cli
 {
  
     /// <summary>
@@ -12,7 +11,7 @@ public static class Command
     /// <param name="args">Optionaly pass the commandline args</param>
     /// <returns></returns>
     public static TArgs? ParseArgs<TArgs>(string[]? args = null)
-        where TArgs : IArgs<TArgs>
+        where TArgs : ICliArgs<TArgs>
     {
         args ??= Environment.GetCommandLineArgs();
         var command = TArgs.CreateCli();

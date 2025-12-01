@@ -104,7 +104,7 @@ namespace DragonFruit2.Generators.Test
                 """;
 
             var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            DragonFruit2Builder.GetOptionDeclaration(sb, "", propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }
@@ -129,7 +129,7 @@ namespace DragonFruit2.Generators.Test
                 """;
 
             var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            DragonFruit2Builder.GetOptionDeclaration(sb, "", propInfo);
 
             Assert.Equal(expected, sb.ToString());
 
@@ -155,7 +155,7 @@ namespace DragonFruit2.Generators.Test
                 """;
 
             var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            DragonFruit2Builder.GetOptionDeclaration(sb, "", propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }
@@ -179,7 +179,7 @@ namespace DragonFruit2.Generators.Test
                 """;
 
             var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            DragonFruit2Builder.GetOptionDeclaration(sb, "", propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }
@@ -203,7 +203,7 @@ namespace DragonFruit2.Generators.Test
                 """;
 
             var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            DragonFruit2Builder.GetOptionDeclaration(sb, "", propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }
@@ -228,7 +228,7 @@ namespace DragonFruit2.Generators.Test
                 """;
 
             var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            DragonFruit2Builder.GetOptionDeclaration(sb, "", propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }

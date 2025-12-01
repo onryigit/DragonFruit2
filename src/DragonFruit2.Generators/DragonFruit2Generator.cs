@@ -10,9 +10,7 @@ namespace DragonFruit2.Generators
     [Generator]
     public sealed partial class DragonFruit2Generator : IIncrementalGenerator
     {
-        private static DragonFruit2Builder builder = new DragonFruit2Builder();
-
-        private static int indentSize = 4;
+        private static readonly DragonFruit2Builder builder = new();
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {

@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DragonFruit2.Generators" Version="0.1.0-beta" />
+		<PackageReference Include="DragonFruit2.Generators" Version="0.1.0-beta" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 </Project>

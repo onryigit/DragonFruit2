@@ -1,15 +1,20 @@
 ﻿using DragonFruit2.GeneratorSupport;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace DragonFruit2.Generators;
 
 public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
 {
-    private static int indentSize = 4;
+    private static readonly int indentSize = 4;
+
+    private enum CliSymbolType
+    {
+        Option,
+        Argument,
+        SubCommand
+    }
 
     /// <summary>
     /// Determines whether the specified syntax node represents an invocation of the generic method 'ParseArgs' with
@@ -125,6 +130,12 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         return semanticModel.GetSymbolInfo(typeArgSyntax).Symbol as INamedTypeSymbol;
     }
 
+
+    private static string GetFieldName(string propName, CliSymbolType symbolType)
+    {
+        return $"{char.ToLower(propName[0])}{propName.Substring(1)}{symbolType}";
+    }
+
     internal static string GetSourceForCommandInfo(CommandInfo commandInfo)
     {
         var indent = "";
@@ -133,7 +144,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
                               : $"\"{commandInfo.Description.Replace("\"", "\"\"")}\"";
 
         var sb = new StringBuilder();
-        sb.Append(OutputFileOpen(commandInfo, description));
+        sb.Append(OutputFileOpen());
         sb.AppendLine();
         if (!string.IsNullOrEmpty(commandInfo.NamespaceName))
         {
@@ -143,56 +154,159 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         }
         var classOrStruct = commandInfo.IsStruct ? "struct" : "class";
         sb.Append($$"""
-                {{indent}}public partial {{classOrStruct}} {{commandInfo.Name}} : IArgs<{{commandInfo.Name}}>
+                {{indent}}public partial {{classOrStruct}} {{commandInfo.Name}} : CliArgs, ICliArgs<{{commandInfo.Name}}>
                 {{indent}}{
                 {{indent}}    public static System.CommandLine.Command CreateCli()
                 {{indent}}    {
-                {{indent}}        var rootCommand = new System.CommandLine.Command("Test")
-                {{indent}}            {
-                {{indent}}                Description = {{description}}
-                {{indent}}            };
+                {{indent}}        private static MyArgsBuilder builder;
+                {{indent}} 
+                {{indent}}        private class MyArgsBuilder
+                {{indent}}        {
                 """);
-
 
         foreach (var option in commandInfo.Options)
         {
-            GetOptionDeclaration(sb, option);
+            GetOptionField(sb, indent, option);
         }
         foreach (var argument in commandInfo.Arguments)
         {
-            GetArgumentDeclaration(sb, argument);
+            GetArgumentField(sb, indent, argument);
         }
         foreach (var subcommand in commandInfo.SubCommands)
         {
-            GetSubCommandDeclaration(sb, subcommand);
+            GetSubCommandField(sb, indent, subcommand);
         }
-        sb.AppendLine();
-        sb.Append($$"""
-                       {{indent}}        return rootCommand;
-                       {{indent}}    }
-                       """);
-        sb.AppendLine();
-        sb.AppendLine();
-        sb.Append($$"""
-                       {{indent}}    public static {{commandInfo.Name}} Create(ParseResult parseResult)
-                       {{indent}}    {
-                       {{indent}}        var newArgs = new {{commandInfo.Name}}()
-                       {{indent}}        {
-                       {{indent}}        };
-                       {{indent}}        return newArgs;
-                       {{indent}}    }
-                       {{indent}}}
 
-                       """);
-        if (!string.IsNullOrEmpty(commandInfo.NamespaceName))
+        GetBuilderCtor(sb, indent, commandInfo);
+
+        GetBuildMethod(sb, indent, commandInfo);
+
+
+        static void GetSubCommandField(StringBuilder sb, string indent, CommandInfo subcommand)
         {
-            indent = indent.Substring(0, indent.Length - indentSize);
-            sb.AppendLine($"{indent}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{indent}            internal readonly Command {GetFieldName(subcommand.Name, CliSymbolType.SubCommand)}");
+        }
+
+        static void GetArgumentField(StringBuilder sb, string indent, PropInfo argument)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"{indent}            internal readonly Argument<{argument.TypeName}> {GetFieldName(argument.Name, CliSymbolType.Argument)}");
+        }
+
+        static void GetOptionField(StringBuilder sb, string indent, PropInfo option)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"{indent}            internal readonly Option<{option.TypeName}> {GetFieldName(option.Name, CliSymbolType.Option)}");
         }
         return sb.ToString();
+
     }
 
-    private static string OutputFileOpen(CommandInfo commandInfo, string description)
+    private static void GetBuildMethod(StringBuilder sb, string indent, CommandInfo commandInfo)
+    {
+        sb.AppendLine();
+        sb.AppendLine($$"""
+                {{indent}}            public System.CommandLine.Command Build()
+                {{indent}}            {");
+                {{indent}}                var command = new System.CommandLine.Command("Test");
+                """);
+        sb.AppendLine($$"""
+                {{indent}}            }");
+                """);
+        AddSymbols(sb, indent, commandInfo);
+
+        static void AddSymbols(StringBuilder sb, string indent, CommandInfo commandInfo)
+        {
+            foreach (var option in commandInfo.Options)
+            {
+                sb.AppendLine($"""
+                    {indent}                command.Add({GetFieldName(option.Name, CliSymbolType.Option)});
+                    """);
+            }
+            foreach (var argument in commandInfo.Arguments)
+            {
+                sb.AppendLine($"""
+                    {indent}                command.Add({GetFieldName(argument.Name, CliSymbolType.Argument)});
+                    """);
+            }
+            foreach (var subcommand in commandInfo.SubCommands)
+            {
+                sb.AppendLine($"""
+                    {indent}                command.Add({GetFieldName(subcommand.Name, CliSymbolType.SubCommand)});
+                    """);
+            }
+        }
+    }
+
+    private static void GetBuilderCtor(StringBuilder sb, string indent, CommandInfo commandInfo)
+    {
+        sb.AppendLine();
+        sb.AppendLine($$"""
+                {{indent}}            public MyArgsBuilder()
+                {{indent}}            {");
+                """);
+        foreach (var option in commandInfo.Options)
+        {
+            GetOptionDeclaration(sb, indent, option);
+        }
+        foreach (var argument in commandInfo.Arguments)
+        {
+            GetArgumentDeclaration(sb, indent, argument);
+        }
+        foreach (var subcommand in commandInfo.SubCommands)
+        {
+            GetSubCommandDeclaration(sb, indent, subcommand);
+        }
+        sb.AppendLine($$"""{{indent}}            }""");
+
+
+
+        //        {{indent}}      var rootCommand = new System.CommandLine.Command("Test")
+        //        {{indent}}            {
+        //        {{indent}}                Description = {{description}}
+        //        {{indent}}            };
+        //        """);
+
+
+        //foreach (var option in commandInfo.Options)
+        //{
+        //    GetOptionDeclaration(sb, option);
+        //}
+        //foreach (var argument in commandInfo.Arguments)
+        //{
+        //    GetArgumentDeclaration(sb, argument);
+        //}
+        //foreach (var subcommand in commandInfo.SubCommands)
+        //{
+        //    GetSubCommandDeclaration(sb, subcommand);
+        //}
+        //sb.AppendLine();
+        //sb.Append($$"""
+        //                       {{indent}}        return rootCommand;
+        //                       {{indent}}    }
+        //                       """);
+        //sb.AppendLine();
+        //sb.AppendLine();
+        //sb.Append($$"""
+        //                       {{indent}}    public static {{commandInfo.Name}} Create(ParseResult parseResult)
+        //                       {{indent}}    {
+        //                       {{indent}}        var newArgs = new {{commandInfo.Name}}()
+        //                       {{indent}}        {
+        //                       {{indent}}        };
+        //                       {{indent}}        return newArgs;
+        //                       {{indent}}    }
+        //                       {{indent}}}
+
+        //                       """);
+        //if (!string.IsNullOrEmpty(commandInfo.NamespaceName))
+        //{
+        //    indent = indent.Substring(0, indent.Length - indentSize);
+        //    sb.AppendLine($"{indent}}}");
+        //}
+    }
+
+    private static string OutputFileOpen()
     {
         return $$"""
                        // <auto-generated />
@@ -202,53 +316,42 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
                        """;
     }
 
-    internal static void GetSubCommandDeclaration(StringBuilder sb, CommandInfo commandInfo)
+    internal static void GetSubCommandDeclaration(StringBuilder sb, string indent, CommandInfo commandInfo)
     {
         sb.Append($$"""
-                                   commandInfo.Add(new System.CommandLine.Command("Test")              
-                                   {
-                                       Description = { { description } }
-                                   };
-                       """);
-        foreach (var option in commandInfo.Options)
-        {
-            GetOptionDeclaration(sb, option);
-        }
-        foreach (var argument in commandInfo.Arguments)
-        {
-            GetArgumentDeclaration(sb, argument);
-        }
-        foreach (var subcommand in commandInfo.SubCommands)
-        {
-            GetSubCommandDeclaration(sb, subcommand);
-        }
+                    {{indent}}               {{commandInfo.Name}}Command = new System.CommandLine.Command("Test")              
+                    {{indent}}               {
+                    {{indent}}                  Description = { { description } }
+                    {{indent}}               };
+                    """);
+
     }
 
-    internal static void GetArgumentDeclaration(StringBuilder sb, PropInfo propInfo)
+    internal static void GetArgumentDeclaration(StringBuilder sb, string indent, PropInfo propInfo)
     {
         var description = propInfo.Description is null
                               ? "null"
                               : $"\"{propInfo.Description.Replace("\"", "\"\"")}\"";
         sb.Append($$"""
-                rootCommand.Add(new Argument<{{propInfo.TypeName}}>("{{propInfo.Name}}")
+                {{propInfo.Name}}Argument = new Argument<{{propInfo.TypeName}}>("{{propInfo.Name}}")
                 {
                     Description = {{description}},
                     Required = {{(propInfo.IsRequiredForCli ? "true" : "false")}}
-                });
+                };
                 """);
     }
 
-    internal static void GetOptionDeclaration(StringBuilder sb, PropInfo propInfo)
+    internal static void GetOptionDeclaration(StringBuilder sb, string indent, PropInfo propInfo)
     {
         var description = propInfo.Description is null
                               ? "null"
                               : $"\"{propInfo.Description.Replace("\"", "\"\"")}\"";
         sb.Append($$"""
-                rootCommand.Add(new Option<{{propInfo.TypeName}}>("--{{propInfo.CliName}}")
+                {{propInfo.Name}}Option = new Option<{ { propInfo.TypeName } } > ("--{{propInfo.CliName}}")
                 {
                     Description = {{description}},
                     Required = {{(propInfo.IsRequiredForCli ? "true" : "false")}}
-                });
+                };
                 """);
     }
 
