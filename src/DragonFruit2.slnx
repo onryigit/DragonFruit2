@@ -1,4 +1,13 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path="../docs/DataProviders.md" />
+    <File Path="../docs/DataValues.md" />
+    <File Path="../docs/Execution.md" />
+    <File Path="../docs/Finalzers.md" />
+    <File Path="../docs/Transforms.md" />
+    <File Path="../docs/Validation.md" />
+    <File Path="../docs/_Overview.md" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path="../ReadMe.md" />
     <File Path="Directory.Build.props" />

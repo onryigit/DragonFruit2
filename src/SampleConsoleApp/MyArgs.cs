@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace SampleConsoleApp;
+﻿namespace SampleConsoleApp;
 
 /// <summary>
 /// This is a test command

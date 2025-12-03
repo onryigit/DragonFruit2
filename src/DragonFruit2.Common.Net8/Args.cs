@@ -16,8 +16,6 @@ public abstract class Args
         }
     }
 
-
-
     public static DataValue<T> GetDataValue<T>(string key, params object[] alternateKeys)
     {
         foreach (var dataProvider in DataProviders)

@@ -1,6 +1,5 @@
 ﻿using DragonFruit2.Common;
 using System.CommandLine;
-using System.CommandLine.Parsing;
 
 namespace DragonFruit2;
 
@@ -13,7 +12,8 @@ public class CliDataProvider() : DataProvider
     {
         if (ParseResult is null) throw new InvalidOperationException("ParseResult is not set on CliDataProvider");
 
-        if (alternateKeys.FirstOrDefault() is Symbol symbol)
+        var symbol = LookupByName[key];
+        if (symbol is not null)
         {
             var symbolResult = ParseResult.GetResult(symbol);
             if (symbolResult is not null && symbolResult.Tokens.Count > 0)
@@ -40,19 +40,6 @@ public class CliDataProvider() : DataProvider
                 ? DataValue<TValue>.CreateEmpty()
                 : DataValue<TValue>.Create(value!, this);
         }
-
-        //SymbolResult? symbolResult;
-        //try
-        //{
-        //    symbolResult = ParseResult.GetResult(searchFor);
-        //}
-        //catch
-        //{
-        //    symbolResult = ParseResult.GetResult($"--{searchFor}");
-        //}
-
-        //throw new NotImplementedException();
-
     }
 
     public void AddNameLookup(string name, Symbol symbol)

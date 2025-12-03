@@ -6,6 +6,16 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsPackable>true</IsPackable>
+
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+
+		<!-- Optional package metadata (adjust as needed) -->
+		<PackageId>DragonFruit2.Generators</PackageId>
+		<Version>0.1.0-beta</Version>
+		<Authors>Kathleen Dollard</Authors>
+		<Description>Source generator and analyzers for DragonFruit2 including required runtime dependencies.</Description>
+		<RepositoryUrl>https://github.com/your/repo</RepositoryUrl>
+
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -23,7 +23,7 @@ public partial class MyArgs : CliArgs, ICliArgs<MyArgs>
     {
         public System.CommandLine.Command Build()
         {
-            var dataProvider = DataProviders.FirstOrDefault(dp => dp is CliDataProvider) as CliDataProvider;
+            var dataProvider = GetCliDataProvider();
 
             var rootCommand = new System.CommandLine.Command("Test")
             {
@@ -44,7 +44,7 @@ public partial class MyArgs : CliArgs, ICliArgs<MyArgs>
             dataProvider.AddNameLookup(nameof(Age), ageOption);
             rootCommand.Add(ageOption);
 
-            var greetingOption = new Option<System.Int32>("--greeting")
+            var greetingOption = new Option<System.String>("--greeting")
             {
                 Description = "Greeting message"
             };
@@ -82,7 +82,7 @@ public partial class MyArgs : CliArgs, ICliArgs<MyArgs>
 
     public static MyArgs Create(ParseResult parseResult)
     {
-        SetCliDataProvider<MyArgs>(parseResult);
+        SetParseResult(parseResult);
         return Create();
     }
 }
