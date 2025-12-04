@@ -1,6 +1,4 @@
-﻿using DragonFruit2.Common;
-
-namespace DragonFruit2;
+﻿namespace DragonFruit2;
 
 public static class Cli
 {
@@ -11,22 +9,14 @@ public static class Cli
     /// <param name="args">Optionaly pass the commandline args</param>
     /// <returns></returns>
     public static TArgs? ParseArgs<TArgs>(string[]? args = null)
-        where TArgs : ICliArgs<TArgs>
+        where TArgs : IArgs<TArgs>
     {
         args ??= Environment.GetCommandLineArgs();
-        var command = TArgs.CreateCli();
-        command.SetAction(parseResult =>
-        {
-            return 0;
-        });
 
-        var parseResult = command.Parse(args);
-        var returnCode = parseResult.Invoke();
-        if (returnCode != 0)
-        {
-            return default;
-        }
-        TArgs? argsObject = TArgs.Create(parseResult);
+        var runner = new Runner<TArgs>();
+        runner.AddDataProvider(new CliDataProvider<TArgs>(args));
+
+
         return argsObject;
 
     }

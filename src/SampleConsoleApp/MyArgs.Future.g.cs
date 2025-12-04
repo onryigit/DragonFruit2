@@ -9,22 +9,26 @@ namespace SampleConsoleApp;
 /// <summary>
 /// 
 /// </summary>
-public partial class MyArgs : CliArgs, ICliArgs<MyArgs>
+public partial class MyArgs : IArgs<MyArgs>
 {
-    public static System.CommandLine.Command CreateCli()
+    private static MyArgsBuilder builder;
+
+
+    public static (Command, Dictionary<string, Symbol)>) Initialize<(Command)>()
+    {
+        throw new NotImplementedException();
+    }
+    public static System.CommandLine.Command CreateCli(CliDataProvider<MyArgs> dataProvider)
     {
         builder ??= new MyArgsBuilder();
         return builder.Build();
-    }   
-    
-    private static MyArgsBuilder builder;
+    }
+
 
     private class MyArgsBuilder
     {
         public System.CommandLine.Command Build()
         {
-            var dataProvider = GetCliDataProvider();
-
             var rootCommand = new System.CommandLine.Command("Test")
             {
                 Description = "This is a test command"
@@ -70,11 +74,11 @@ public partial class MyArgs : CliArgs, ICliArgs<MyArgs>
         if (greetingDataValue.IsSet) Greeting = greetingDataValue.Value;
     }
 
-    public static MyArgs Create()
+    public static MyArgs Create(Runner<MyArgs> runner)
     {
-        var nameDataValue = GetDataValue<string>("Name");
-        var ageDataValue = GetDataValue<Int32>("Age");
-        var greetingDataValue = GetDataValue<string>("Greeting");
+        var nameDataValue = runner.GetDataValue<string>("Name");
+        var ageDataValue = runner.GetDataValue<Int32>("Age");
+        var greetingDataValue = runner.GetDataValue<string>("Greeting");
 
         var newArgs = new MyArgs(nameDataValue, ageDataValue, greetingDataValue);
         return newArgs;

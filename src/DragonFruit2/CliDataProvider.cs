@@ -1,16 +1,62 @@
 ﻿using DragonFruit2.Common;
+using DragonFruit2.Common.Net8;
 using System.CommandLine;
+using System.ComponentModel.DataAnnotations;
 
 namespace DragonFruit2;
 
-public class CliDataProvider() : DataProvider
+public class CliDataProvider<TArgs> : DataProvider
+            where TArgs : IArgs<TArgs>
 {
-    public ParseResult? ParseResult { get; set; }
+    public CliDataProvider(string[] inputArgs)
+    {
+        InputArgs = inputArgs ?? System.Environment.GetCommandLineArgs();
+    }
+
+    public string[] InputArgs
+    {
+        get;
+        set
+        {
+            field = value;
+            ParseResult = null;
+        }
+    }
+    public Command? Command
+    {
+        get
+        {
+            if (field is null)
+            {
+                field = TArgs.Initialize<Command>();
+                field.SetAction(parseResult =>
+                {
+                    return 0;
+                });
+            }
+            return field;
+        }
+    }
+
+    public ParseResult? ParseResult
+    {
+        get => field ??= Command?.Parse(InputArgs);
+        private set;
+    }
+
     public Dictionary<string, Symbol> LookupByName { get; set; } = [];
 
     public override bool TryGetValue<TValue>(string key, object[] alternateKeys, out DataValue<TValue> trialValue)
     {
-        if (ParseResult is null) throw new InvalidOperationException("ParseResult is not set on CliDataProvider");
+        if (Command is null) throw new ArgumentNullException(nameof(Command));
+        if (ParseResult is null) throw new ArgumentNullException(nameof(ParseResult));
+        //// TODO: The invocation should be replaced with direct calls to error reporting if possible
+        //var returnCode = parseResult.Invoke();
+        //if (returnCode != 0)
+        //{
+        //    trialValue = DataValue<TValue>.CreateEmpty();
+        //    return false;
+        //}
 
         var symbol = LookupByName[key];
         if (symbol is not null)
@@ -46,4 +92,6 @@ public class CliDataProvider() : DataProvider
     {
         LookupByName[name] = symbol;
     }
+
+
 }

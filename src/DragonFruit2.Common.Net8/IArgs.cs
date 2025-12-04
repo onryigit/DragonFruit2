@@ -1,7 +1,9 @@
-﻿namespace DragonFruit2.Common.Net8;
+﻿namespace DragonFruit2.Common;
 
-public interface IArgs<T>
+public interface IArgs<TArgs, TData>
+    where TArgs :IArgs<TArgs, TData>
 {
-    public abstract static T Create();
+    public abstract static TData Initialize<TData>();
+    public abstract static TArgs Create(Runner<TArgs> runner);
 
 }

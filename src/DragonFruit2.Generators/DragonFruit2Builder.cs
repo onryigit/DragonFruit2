@@ -1,5 +1,4 @@
-﻿using DragonFruit2.Common;
-using DragonFruit2.GeneratorSupport;
+﻿using DragonFruit2.GeneratorSupport;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text;
