@@ -1,6 +1,4 @@
-﻿using DragonFruit2.Common;
-
-namespace DragonFruit2;
+﻿namespace DragonFruit2;
 
 public class Runner<TArgs>
     where TArgs : IArgs<TArgs>

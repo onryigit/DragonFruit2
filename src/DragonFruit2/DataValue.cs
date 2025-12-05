@@ -1,4 +1,4 @@
-﻿namespace DragonFruit2.Common;
+﻿namespace DragonFruit2;
 
 public readonly record struct DataValue<T>
 {

@@ -1,6 +1,4 @@
 ﻿using DragonFruit2.GeneratorSupport;
-using System;
-using System.Collections.Generic;
 using System.Text;
 using Xunit;
 

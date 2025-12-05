@@ -1,4 +1,4 @@
-﻿namespace DragonFruit2.Common.Net8;
+﻿namespace DragonFruit2;
 
 public abstract class Args
 {

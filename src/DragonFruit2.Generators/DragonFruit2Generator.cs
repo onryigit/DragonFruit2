@@ -1,9 +1,4 @@
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Linq;
-using DragonFruit2.GeneratorSupport;
-using System.Text;
 
 namespace DragonFruit2.Generators
 {

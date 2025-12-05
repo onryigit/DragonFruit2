@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System.Linq;
 using System.Text;
 
 namespace DragonFruit2.GeneratorSupport;

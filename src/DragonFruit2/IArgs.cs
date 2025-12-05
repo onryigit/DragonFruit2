@@ -1,6 +1,4 @@
-﻿using DragonFruit2.Common.Net8;
-
-namespace DragonFruit2.Common;
+﻿namespace DragonFruit2;
 
 public interface IArgs<TArgs>
     where TArgs :IArgs<TArgs>
