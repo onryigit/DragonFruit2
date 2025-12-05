@@ -10,48 +10,43 @@ namespace SampleConsoleApp;
 /// </summary>
 public partial class MyArgs : IArgs<MyArgs>
 {
-    public static void Initialize(Builder <MyArgs> builder)
+    public static void Initialize(Builder<MyArgs> builder)
     {
         var cliDataProvider = builder.DataProviders.OfType<CliDataProvider<MyArgs>>().FirstOrDefault();
-        if (cliDataProvider != null)
+        if (cliDataProvider is null)
         {
             cliDataProvider = new CliDataProvider<MyArgs>();
             builder.DataProviders.Add(cliDataProvider);
         }
-        cliDataProvider.Command = Build(cliDataProvider);
 
-
-        System.CommandLine.Command Build(CliDataProvider<MyArgs> dataProvider)
+        var rootCommand = new System.CommandLine.Command("Test")
         {
-            var rootCommand = new System.CommandLine.Command("Test")
-            {
-                Description = "This is a test command"
-            };
-            var nameOption = new Option<string>("--name")
-            {
-                Description = "Your name",
-                Required = true
-            };
-            dataProvider.AddNameLookup(nameof(Name), nameOption);
-            rootCommand.Add(nameOption);
+            Description = "This is a test command"
+        };
+        var nameOption = new Option<string>("--name")
+        {
+            Description = "Your name",
+            Required = true
+        };
+        cliDataProvider.AddNameLookup(nameof(Name), nameOption);
+        rootCommand.Add(nameOption);
 
-            var ageOption = new Option<System.Int32>("--age")
-            {
-                Description = "Your Age"
-            };
-            dataProvider.AddNameLookup(nameof(Age), ageOption);
-            rootCommand.Add(ageOption);
+        var ageOption = new Option<System.Int32>("--age")
+        {
+            Description = "Your Age"
+        };
+        cliDataProvider.AddNameLookup(nameof(Age), ageOption);
+        rootCommand.Add(ageOption);
 
-            var greetingOption = new Option<System.String>("--greeting")
-            {
-                Description = "Greeting message"
-            };
-            dataProvider.AddNameLookup(nameof(Greeting), greetingOption);
-            rootCommand.Add(greetingOption);
+        var greetingOption = new Option<System.String>("--greeting")
+        {
+            Description = "Greeting message"
+        };
+        cliDataProvider.AddNameLookup(nameof(Greeting), greetingOption);
+        rootCommand.Add(greetingOption);
 
-            rootCommand.Add(new System.CommandLine.Command("TestChild"));
-            return rootCommand;
-        }
+        rootCommand.Add(new System.CommandLine.Command("TestChild"));
+        cliDataProvider.RootCommand = rootCommand;
     }
 
     // Only generate the following constructor if there are no other constructors defined (possibly via partial constructor)

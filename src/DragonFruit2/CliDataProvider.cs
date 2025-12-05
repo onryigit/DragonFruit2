@@ -19,7 +19,7 @@ public class CliDataProvider<TArgs> : DataProvider
             ParseResult = null;
         }
     }
-    public Command? Command
+    public Command? RootCommand
     {
         get;
         set
@@ -34,7 +34,7 @@ public class CliDataProvider<TArgs> : DataProvider
 
     public ParseResult? ParseResult
     {
-        get => field ??= Command?.Parse(InputArgs);
+        get => field ??= RootCommand?.Parse(InputArgs);
         private set;
     }
 
@@ -42,8 +42,8 @@ public class CliDataProvider<TArgs> : DataProvider
 
     public override bool TryGetValue<TValue>(string key, object[] alternateKeys, out DataValue<TValue> trialValue)
     {
-        if (Command is null) throw new ArgumentNullException(nameof(Command));
-        ParseResult ??= Command.Parse(InputArgs);
+        if (RootCommand is null) throw new ArgumentNullException(nameof(RootCommand));
+        ParseResult ??= RootCommand.Parse(InputArgs);
         //// TODO: The invocation should be replaced with direct calls to error reporting if possible
         //var returnCode = parseResult.Invoke();
         //if (returnCode != 0)
