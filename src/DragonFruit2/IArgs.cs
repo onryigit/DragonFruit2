@@ -3,7 +3,7 @@
 public interface IArgs<TArgs>
     where TArgs :IArgs<TArgs>
 {
-    public abstract static void Initialize(Runner<TArgs> runner);
-    public abstract static TArgs Create(Runner<TArgs> runner);
+    public abstract static void Initialize(Builder<TArgs> builder);
+    public abstract static TArgs Create(Builder<TArgs> builder);
 
 }

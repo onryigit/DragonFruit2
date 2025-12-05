@@ -43,7 +43,7 @@ public class CliDataProvider<TArgs> : DataProvider
     public override bool TryGetValue<TValue>(string key, object[] alternateKeys, out DataValue<TValue> trialValue)
     {
         if (Command is null) throw new ArgumentNullException(nameof(Command));
-        if (ParseResult is null) throw new ArgumentNullException(nameof(ParseResult));
+        ParseResult ??= Command.Parse(InputArgs);
         //// TODO: The invocation should be replaced with direct calls to error reporting if possible
         //var returnCode = parseResult.Invoke();
         //if (returnCode != 0)

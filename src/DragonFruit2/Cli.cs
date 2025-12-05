@@ -2,7 +2,7 @@
 
 public static class Cli
 {
- 
+
     /// <summary>
     /// </summary>
     /// <typeparam name="TArgs">The type containing the CLI definition</typeparam>
@@ -13,10 +13,10 @@ public static class Cli
     {
         args ??= Environment.GetCommandLineArgs();
 
-        var runner = new Runner<TArgs>();
+        var argsObject = new Builder<TArgs>().ParseArgs(args);
 
-        throw new NotImplementedException();
-       // return argsObject;
+
+        return argsObject;
 
     }
 }

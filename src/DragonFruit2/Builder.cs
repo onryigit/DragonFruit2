@@ -1,9 +1,9 @@
 ﻿namespace DragonFruit2;
 
-public class Runner<TArgs>
+public class Builder<TArgs>
     where TArgs : IArgs<TArgs>
 {
-    public Runner()
+    public Builder()
     {
         AddDataProvider(new CliDataProvider<TArgs>());
     }
@@ -34,8 +34,16 @@ public class Runner<TArgs>
         return DataValue<T>.CreateEmpty();
     }
 
-    //public TArgs CreateArgs()
-    //{
-    //    TArgs.Create();
-    //}
+
+    public TArgs ParseArgs(string[] args)
+    {
+        TArgs.Initialize(this);
+
+        var cliDataProvider = DataProviders.OfType<CliDataProvider<TArgs>>().FirstOrDefault()
+            ?? throw new InvalidOperationException("Internal error: CliDataProvider not found");
+        cliDataProvider.InputArgs = args;
+        var argsObject = TArgs.Create(this);
+        // Validate
+        return argsObject;
+    }
 }
