@@ -5,7 +5,6 @@ using DragonFruit2;
 using DragonFruit2.Validators;
 using System.CommandLine;
 using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Headers;
 
 namespace SampleConsoleApp;
 
@@ -16,7 +15,8 @@ public partial class MyArgs : IArgs<MyArgs>
 {
     private List<Validator<int>>? ageValidators;
 
-    public IEnumerable<ValidationFailure> ValidationFailures { get; private set; } = [];
+    public List<ValidationFailure> ValidationFailures { get; } = [];
+    public bool IsValid => !ValidationFailures.Any();
 
     public static void Initialize(Builder<MyArgs> builder)
     {
@@ -81,7 +81,8 @@ public partial class MyArgs : IArgs<MyArgs>
 
         var newArgs = new MyArgs(nameDataValue, ageDataValue, greetingDataValue);
 
-        newArgs.ValidationFailures = newArgs.Validate();
+        var newFailures = newArgs.Validate();
+        newArgs.ValidationFailures.AddRange(newFailures);
 
         return newArgs;
     }
@@ -95,7 +96,7 @@ public partial class MyArgs : IArgs<MyArgs>
         {
             foreach (var validator in ageValidators)
             {
-                failures.Concat(validator.Validate(Age));
+                failures.AddRange(validator.Validate(Age));
             }
         }
 
