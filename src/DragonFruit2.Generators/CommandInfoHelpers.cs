@@ -1,6 +1,11 @@
 ﻿using DragonFruit2.GeneratorSupport;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using DragonFruit2;
+using System.Linq;
+using System.Collections.Generic;
+
+#nullable enable
 
 namespace DragonFruit2.Generators;
 
@@ -42,7 +47,17 @@ public static class CommandInfoHelpers
             InitializerText = initializerText,
         };
 
-
+        var validationAttributes = propSymbol.GetAttributes()
+            .Where(x => x.AttributeClass?.BaseType?.Name == "ValidatorAttribute")
+            .Select(x => x);
+        foreach (var validationAttribute in validationAttributes)
+        {
+            var validatorInfo = GetValidatorInfo(validationAttribute);
+            if (validatorInfo != null)
+            {
+                propInfo.Validators.Add(validatorInfo);
+            }
+        }
 
 
         // Decide whether the property should be treated as required for CLI:
@@ -76,4 +91,66 @@ public static class CommandInfoHelpers
         }
     }
 
+    /// <summary>
+    /// Extract validator metadata from an AttributeData.
+    /// This reads the attribute class, constructor arguments and named arguments.
+    /// The returned ValidatorInfo is populated with the attribute name, full type name,
+    /// a list of constructor-argument string representations, and a dictionary of named args.
+    /// </summary>
+    private static ValidatorInfo? GetValidatorInfo(AttributeData validationAttribute)
+    {
+        if (validationAttribute is null) return null;
+        var attrClass = validationAttribute.AttributeClass;
+        if (attrClass is null) return null;
+
+        var info = new ValidatorInfo
+        {
+            Name = attrClass.Name.Replace("Attribute", ""),
+            FullTypeName = attrClass.ToDisplayString()
+        };
+
+        // Convert TypedConstant to readable string representation
+        static string TypedConstantToString(TypedConstant tc)
+        {
+            if (tc.IsNull) return "null";
+
+            if (tc.Kind == TypedConstantKind.Array)
+            {
+                var elems = tc.Values.Select(TypedConstantToString);
+                return "[" + string.Join(", ", elems) + "]";
+            }
+
+            if (tc.Value is string s) return $"\"{s}\"";
+            if (tc.Value is char c) return $"'{c}'";
+            if (tc.Value is bool b) return b ? "true" : "false";
+            if (tc.Value is IFormattable f) return f.ToString(null, System.Globalization.CultureInfo.InvariantCulture) ?? tc.Value.ToString() ?? "null";
+            return tc.Value?.ToString() ?? "null";
+        }
+
+        // Constructor arguments
+        var ctorArgs = validationAttribute.ConstructorArguments
+            .Select(TypedConstantToString)
+            .ToList();
+
+        // Named arguments (e.g., named properties set on the attribute)
+        var namedArgs = validationAttribute.NamedArguments
+            .ToDictionary(kv => kv.Key, kv => TypedConstantToString(kv.Value));
+
+        // Attempt to populate expected ValidatorInfo fields if they exist.
+        // Common ValidatorInfo shape: Name, FullTypeName, ConstructorArguments, NamedArguments.
+        // Populate them defensively via available properties.
+        try
+        {
+            // These properties are commonly present; adjust names if your ValidatorInfo differs.
+            info.ConstructorArguments = ctorArgs;
+            info.NamedArguments = namedArgs;
+        }
+        catch
+        {
+            // If ValidatorInfo doesn't expose those members, silently keep minimal info (name/full type).
+            // Consumer can call a helper to read constructor args directly from AttributeData if needed.
+        }
+
+        return info;
+    }
 }

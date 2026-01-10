@@ -44,7 +44,9 @@ A final step before returning the object. This is expected to be used for creati
 
 In addition to creating the args class (`MyArgs` in this section), the developer calls the static `TryParse` method of the `Cli` class, passing the root args class as the type parameter.
 
-Generation uses the call to `TryParse` as an indicator to generate additional code in an `MyArgs` partial class. This adds the `IArgs` interface and implements it's two methods. `Initialize(Builder builder)` and `Create()`
+Generation uses the call to `TryParse` as an indicator to generate additional code in an `MyArgs` partial class. This adds the `IArgs` interface and implements it's two methods. `Initialize(Builder builder)` and `Create()`. At runtime, this method creates a fully hydrated and validated instance of hte `MyArgs` class.
+
+
 
 
 

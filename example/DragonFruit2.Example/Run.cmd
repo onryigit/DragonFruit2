@@ -1,0 +1,1 @@
+DragonFruit2.Example\bin\Debug\net10.0\DragonFruit2.Example.exe %*

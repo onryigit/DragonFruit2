@@ -1,4 +1,6 @@
-﻿namespace SampleConsoleApp;
+﻿using DragonFruit2.Validators;
+
+namespace SampleConsoleApp;
 
 /// <summary>
 /// This is a test command
@@ -13,6 +15,7 @@ public partial class MyArgs
     /// <summary>
     /// "Your age"
     /// </summary>
+    [GreaterThan(0)]
     public int Age { get; set; } = 0;
 
     /// <summary>

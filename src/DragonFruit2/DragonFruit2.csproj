@@ -11,7 +11,7 @@
 
 		<!-- Optional package metadata (adjust as needed) -->
 		<PackageId>DragonFruit2</PackageId>
-		<Version>0.1.0-beta</Version>
+		<Version>0.1.0-beta-003</Version>
 		<Authors>Kathleen Dollard</Authors>
 		<Description>Source generator and analyzers for DragonFruit2 including required runtime dependencies.</Description>
 		<RepositoryUrl>https://github.com/your/repo</RepositoryUrl>

@@ -1,6 +1,6 @@
 ﻿namespace DragonFruit2;
 
-public abstract class Args
+public abstract class Args 
 {
     public static List<DataProvider> DataProviders { get; } = [];
 

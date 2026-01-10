@@ -1,4 +1,5 @@
 //using DragonFruit2.Common;
+using DragonFruit2.Generators;
 using Microsoft.CodeAnalysis;
 
 namespace DragonFruit2.GeneratorSupport;
@@ -37,6 +38,7 @@ public record class PropInfo
                     : // reference type
                       NullableAnnotation == NullableAnnotation.NotAnnotated && !HasInitializer;
 
+    public List<ValidatorInfo> Validators { get; init; } = [];
 }
 
 

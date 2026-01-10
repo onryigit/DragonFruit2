@@ -12,7 +12,7 @@ The three cohorts under consideration:
   - This cohort inspires limiting the concepts that are required for success
 - Programmers that want to write a quick and dirty app
   - This cohort inspires it being the simplest way to create a console app
-- Libary authors with CLIs of moderate complexity
+- Library authors with CLIs of moderate complexity
   - This cohort inspires advanced features such as cross-property validation, transforms, and data providers
 - (Aspirational) The .NET CLI
   - This cohort will be essential to us understnading the limitations of DragonFruit2
@@ -28,6 +28,10 @@ The three cohorts under consideration:
 In order to support the identified cohorts:
 
 - Basic parsing is dirt simple with no knowledge beyond classes and methods that are easy to find in IntelliSense
+- .NET Standard/.NET (Full/Windows) Framework ca use DragonFruit2
+  - This is a non-beginner's scenario and it may not be possible for it to be the same or quite as simple
+  - The downlevel approach should work with modern .NET to support multi-targeting
+  - While there can be compromises, most functionality should work, perhaps in a less ideal way, in the supported versions of C# Framework (C# 7.2)
 - Invocation is optional
 - `required` is via the `required` keyword, with attributes available for down-level .NET versions
   - This supports object creation by other means to support application testing
@@ -43,14 +47,17 @@ In order to support the identified cohorts:
   - Unanticipated validations are done via Validator classes that are easy to write and apply and can use more than one property
   - Validator classes (including those that back attributes) are rich containing at least `Id`, `Description`, `Message`, `Predicate`
   - Priority will be considered. If used, this would allow "bands" of validation where is some failed others would not be checked or reported. The intent would be to help users find the needle in the haystack when one error cascades to many errors, making it difficult to find the underlying error
-- Transforms can be performed between data collection and validation (such as for trimming, string casing, or ceiling/floor)
+- Immutable args classes are fully embraced and supported
+- Transforms can be performed during construction between data collection and validation (such as for trimming, string casing, or ceiling/floor)
 
 ### Non-goals
 
 - There will be no grow-up story. Because DragonFruit2 is a layer on top of System.CommandLine designed to allow evolution of features, there will be no way to drop it without losing features. As such, extension points must be well thought out and most or all of the capabilities of System.CommandLine may be available.
-- 
+
 - Empowering people to break System.CommandLine's version of Posix. This may be possible if we allow custom parsing, but it is a System.CommandLine feature DragonFruit2 itself does not support.
   - It is possible that exploring the .NET CLI will lead to some softening in this stance
+
+- Supporting `struct` arg types. Supporting `struct` arg classes will be desirable if it happens, but we will not off trade simplicity for the programmer using DragonFruit2. This will result in a very small number of allocations, and even complex CLIs such as the .NET CLI have only 50-75 classes and may not stay in memory long enough for GC to occur.
 
 ## Syntax
 
@@ -95,20 +102,6 @@ Top level statements (C# 9) provides a great way for beginners to write code wit
 This is an opportunity to introduce some of the richness of property declarations, such as `required` and `initialization`
 
 It is also an opportunity to introduce attributes, such as those for 
-
-
-## High level design
-
-DragonFruit2 relies on Roslyn Code generation and the args class must be a partial class. It does _not_ run during design time generation.
-
-`ParseArgs` is specific to System.CommandLine. Alternative generation can support other input mechanisms, although the basic design is for all the data to be collected and validated, making some possible entry mechanisms more difficult (WinForms or MAUI).
-
-All DragonFruit2 args classes implement a `Create` static factory method that is accessed either via a static interface method, or a direct call which uses a base class to avoid squiggles prior to first generation (the two syntaxes presented in [Syntax](#syntax)).
-
-[[ Work on this design, as it currently requires a base class, block struct. Instead create a DataBuilder instance and move the Args.cs and CliArgs.cs code into a DataBuilder class]]
-
-The `Create` method is fairly simple, it creates
-just creating a DataValue for each property using the static `GetDataValue` method of the `Args` class. This can be called directly if a derived class, 
 
 
 

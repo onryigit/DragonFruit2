@@ -53,7 +53,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
     }
 
 
-    public static CommandInfo? GetRootCommandInfoFromInvocation(InvocationExpressionSyntax invocationSyntax, SemanticModel semanticModel)
+    internal static CommandInfo? GetRootCommandInfoFromInvocation(InvocationExpressionSyntax invocationSyntax, SemanticModel semanticModel)
     {
         var rootArgsTypeArgSymbol = GetArgsTypeSymbol(invocationSyntax, semanticModel);
         if (rootArgsTypeArgSymbol is null)
@@ -66,6 +66,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
     {
         var commandInfo = CommandInfoHelpers.CreateCommandInfo(typeSymbol);
 
+        // future: Check perf here (semanticModel is captured, etc)
         var props = typeSymbol.GetMembers()
                               .OfType<IPropertySymbol>()
                               .Where(p => !p.IsStatic)
@@ -137,14 +138,79 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         OpenNamespace(commandInfo, sb);
         OpenArgsPartialClass(commandInfo, sb);
 
+        OutputFields(commandInfo, sb);
         OutputInitializeMethod(commandInfo, sb);
         sb.AppendLine();
         OutputConstructors(commandInfo, sb);
         OutputStaticCreateMethods(commandInfo, sb);
+        OutputValidateMethod(commandInfo, sb);
+        OutputInitializeValidatorsMethod(commandInfo, sb);
 
         CloseCurly(sb);
         CloseNamespace(commandInfo, sb);
         return sb.ToString();
+    }
+
+    private static void OutputInitializeValidatorsMethod(CommandInfo commandInfo, StringBuilder sb)
+    {
+        sb.AppendLine($"""{indent}private void InitializeValidators()""");
+        OpenCurly(sb);
+        foreach (var prop in commandInfo.Options.Concat(commandInfo.Arguments))
+        {
+            if (prop.Validators is not null && prop.Validators.Any())
+            {
+                var localSymbolName = GetLocalSymbolName(prop.Name);
+                sb.AppendLine($"""{indent}{localSymbolName}Validators ??= new List<Validator<{prop.TypeName}>>();""");
+                foreach (var validator in prop.Validators)
+                {
+                    sb.Append($"""{indent}{localSymbolName}Validators.Add(new {validator.Name}Validator<{prop.TypeName}>("{prop.Name}", """);
+                    sb.Append(string.Join(", ", validator.ConstructorArguments));
+                    if (validator.NamedArguments.Any())
+                    {
+                        sb.Append(",");
+                        sb.Append(string.Join(", ", validator.NamedArguments.Select(kv => $"{kv.Key}: {kv.Value}")));
+                    }
+                    sb.AppendLine("));");
+                }
+                sb.AppendLine();
+            }
+        }
+        CloseCurly(sb);
+    }
+
+    private static void OutputValidateMethod(CommandInfo commandInfo, StringBuilder sb)
+    {
+        sb.AppendLine($"""{indent}public IEnumerable<ValidationFailure> Validate()""");
+        OpenCurly(sb);
+        sb.AppendLine($"""{indent}var failures = new List<ValidationFailure>();""");
+        sb.AppendLine($"""{indent}InitializeValidators();""");
+        sb.AppendLine();
+        foreach (var prop in commandInfo.Options.Concat(commandInfo.Arguments))
+        {
+            if (prop.Validators is not null && prop.Validators.Any())
+            {
+                var localSymbolName = GetLocalSymbolName(prop.Name);
+                sb.AppendLine($"""{indent}if ({localSymbolName}Validators is not null)""");
+                OpenCurly(sb);
+                sb.AppendLine($"""{indent}foreach (var validator in {localSymbolName}Validators)""");
+                OpenCurly(sb);
+                sb.AppendLine($"""{indent}failures.Concat(validator.Validate({prop.Name}));""");
+                CloseCurly(sb);
+                CloseCurly(sb);
+            }
+        }
+        sb.AppendLine();
+        sb.AppendLine($"""{indent}return failures;""");
+        CloseCurly(sb);
+    }
+
+    private static void OutputFields(CommandInfo commandInfo, StringBuilder sb)
+    {
+        foreach (var prop in commandInfo.Options.Concat(commandInfo.Arguments))
+        {
+            if (prop.Validators is not null && prop.Validators.Any())
+            { sb.AppendLine($"""{indent}private List<Validator<{prop.TypeName}>>?  {GetLocalSymbolName(prop.Name)}Validators;"""); }
+        }
     }
 
     private static void OutputStaticCreateMethods(CommandInfo commandInfo, StringBuilder sb)
@@ -166,6 +232,9 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
                 sb.Append(", ");
         }
         sb.AppendLine(");");
+        sb.AppendLine(); 
+        sb.AppendLine($"""{indent}newArgs.ValidationFailures = newArgs.Validate();""");
+        sb.AppendLine();
         sb.AppendLine($"""{indent}return newArgs;""");
         CloseCurly(sb);
 
@@ -186,7 +255,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         foreach (var propInfo in commandInfo.PropInfos)
         {
             sb.Append($"""DataValue<{propInfo.TypeName}> {propInfo.Name.ToCamelCase()}DataValue""");
-            if (propInfo != lastPropInfo) 
+            if (propInfo != lastPropInfo)
                 sb.Append(", ");
         }
         sb.AppendLine(")");
@@ -290,6 +359,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         return $"""
                        // <auto-generated />
                        using DragonFruit2;
+                       using DragonFruit2.Validators;
                        using System.CommandLine;
                        using System.Diagnostics.CodeAnalysis;
 

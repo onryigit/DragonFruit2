@@ -1,4 +1,6 @@
-﻿namespace SampleConsoleApp;
+﻿using DragonFruit2.Validators;
+
+namespace SampleConsoleApp;
 
 /// <summary>
 /// This is a test command
@@ -8,15 +10,16 @@ public partial class MyArgs
     /// <summary>
     /// "Your name"
     /// </summary>
-    public required string Name { get; set; }
+    public required string Name { get; init; }
 
     /// <summary>
     /// "Your age"
     /// </summary>
-    public int Age { get; set; } = 0;
+    [GreaterThan(0)]
+    public int Age { get; init; } = 1;
 
     /// <summary>
     /// "Greeting message"
     /// </summary>
-    public string Greeting { get; set; } = string.Empty;
+    public string Greeting { get; init; } = string.Empty;
 }
