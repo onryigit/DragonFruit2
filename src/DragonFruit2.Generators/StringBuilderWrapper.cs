@@ -27,7 +27,7 @@ internal class StringBuilderWrapper
     {
         foreach (string line in lines)
         {
-            _sb.AppendLine(line);
+            AppendLine(line);
         }
     }
 
@@ -64,13 +64,6 @@ internal class StringBuilderWrapper
         {
             CloseCurly();
         }
-    }
-
-    public void OpenClass()
-    {
-        AppendLine();
-        AppendLine("public partial class");
-        OpenCurly();
     }
 
     public void CloseClass()

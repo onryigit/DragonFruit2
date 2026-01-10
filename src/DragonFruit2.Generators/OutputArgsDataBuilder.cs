@@ -20,6 +20,7 @@ internal static class OutputArgsDataBuilder
     }
     internal static void OpenClass(CommandInfo commandInfo, StringBuilderWrapper sb)
     {
+        sb.AppendLine();
         sb.AppendLines([
                 "/// <summary>",
                 "/// </summary>",
@@ -72,10 +73,9 @@ internal static class OutputArgsDataBuilder
         string symbolName = $"{OutputHelpers.GetLocalSymbolName(propInfo.Name)}Option";
         sb.AppendLine($"""var {symbolName} = new Option<{propInfo.TypeName}>("--{propInfo.CliName}")""");
         sb.OpenCurly();
-        sb.AppendLine($"""
-                Description = {description},
-                Required = {(propInfo.IsRequiredForCli ? "true" : "false")}
-                """);
+        sb.AppendLines([
+                $"Description = {description},",
+                $"""Required = {(propInfo.IsRequiredForCli ? "true" : "false")}"""]);
         sb.CloseCurly(endStatement: true);
 
         AddSymbolToLookup(sb, propInfo, symbolName);
