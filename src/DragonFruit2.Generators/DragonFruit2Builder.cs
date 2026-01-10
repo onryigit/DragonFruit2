@@ -138,7 +138,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         OpenNamespace(commandInfo, sb);
         OpenArgsPartialClass(commandInfo, sb);
 
-        OutputFields(commandInfo, sb);
+        OutputFieldsAndProperties(commandInfo, sb);
         OutputInitializeMethod(commandInfo, sb);
         sb.AppendLine();
         OutputConstructors(commandInfo, sb);
@@ -204,13 +204,15 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         CloseCurly(sb);
     }
 
-    private static void OutputFields(CommandInfo commandInfo, StringBuilder sb)
+    private static void OutputFieldsAndProperties(CommandInfo commandInfo, StringBuilder sb)
     {
         foreach (var prop in commandInfo.Options.Concat(commandInfo.Arguments))
         {
             if (prop.Validators is not null && prop.Validators.Any())
             { sb.AppendLine($"""{indent}private List<Validator<{prop.TypeName}>>?  {GetLocalSymbolName(prop.Name)}Validators;"""); }
         }
+        sb.AppendLine($$"""{{indent}}public List<ValidationFailure>?  ValidationFailures { get; } = [];""");
+        sb.AppendLine($$"""{{indent}}public bool IsValid => !ValidationFailures.Any();""");
     }
 
     private static void OutputStaticCreateMethods(CommandInfo commandInfo, StringBuilder sb)
@@ -233,7 +235,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         }
         sb.AppendLine(");");
         sb.AppendLine(); 
-        sb.AppendLine($"""{indent}newArgs.ValidationFailures = newArgs.Validate();""");
+        sb.AppendLine($"""{indent}newArgs.ValidationFailures.Concat(newArgs.Validate());""");
         sb.AppendLine();
         sb.AppendLine($"""{indent}return newArgs;""");
         CloseCurly(sb);
