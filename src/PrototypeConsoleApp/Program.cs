@@ -2,6 +2,7 @@
 using SampleConsoleApp;
 
 var myArgsDataValues = Cli.ParseArgs<MyArgs>(args);
+Console.WriteLine("Welcome to the Sample Console App!") ;
 
 if (myArgsDataValues.IsValid)
 {
@@ -14,3 +15,6 @@ else
 {
     // Display validation errors
 }
+
+Console.WriteLine("Goodbye from the Sample Console App!");
+

@@ -14,10 +14,7 @@ public abstract class DataBuilder<TArgs> where TArgs : Args<TArgs>, IArgs<TArgs>
         }
         return cliDataProvider;
     }
-    public virtual void Initialize(Builder<TArgs> builder)
-    {
-        // No-op by default
-    }
+    public abstract void Initialize(Builder<TArgs> builder);
 
     public DataValues<TArgs> Create(Builder<TArgs> builder)
     {
@@ -25,7 +22,8 @@ public abstract class DataBuilder<TArgs> where TArgs : Args<TArgs>, IArgs<TArgs>
         dataValues.ValidationFailures.AddRange(CheckRequiredValues(builder));
         if (dataValues.IsValid)
         {
-            CreateInstance(builder);
+            var newArgs = CreateInstance(builder);
+            dataValues.Args = newArgs;
         }
 
         if (dataValues.Args is not null)
@@ -39,4 +37,14 @@ public abstract class DataBuilder<TArgs> where TArgs : Args<TArgs>, IArgs<TArgs>
     protected abstract TArgs CreateInstance(Builder<TArgs> builder);
     protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(Builder<TArgs> builder);
 
+    protected ValidationFailure? CheckRequiredValue<TValue>(string valueName, DataValue<TValue> dataValue)
+    {
+        if (!dataValue.IsSet || dataValue.Value is null)
+        {
+            var message = $"The value for {valueName} is required but was not provided.";
+            var idString = $"{Validator.ToValidationIdString(ValidationId.Required)};";
+            return new ValidationFailure<TValue>(idString, message, valueName, dataValue.Value);
+        }
+        return null;
+    }
 }

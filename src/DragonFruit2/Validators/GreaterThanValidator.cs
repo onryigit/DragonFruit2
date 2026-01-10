@@ -4,7 +4,7 @@ public class GreaterThanValidator<TValue> : Validator<TValue>
     where TValue : IComparable<TValue>
 {
     public GreaterThanValidator(string valueName, TValue compareWithValue)
-        : base($"{DragonFruitValidationPrefix}{ValidationId.GreaterThan}", valueName)
+        : base((int)ValidationId.GreaterThan, valueName)
     {
         CompareWithValue = compareWithValue;
     }

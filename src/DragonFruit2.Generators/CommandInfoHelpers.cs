@@ -1,11 +1,6 @@
 ﻿using DragonFruit2.GeneratorSupport;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using DragonFruit2;
-using System.Linq;
-using System.Collections.Generic;
-
-#nullable enable
 
 namespace DragonFruit2.Generators;
 

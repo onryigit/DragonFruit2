@@ -118,8 +118,8 @@ namespace DragonFruit2.Generators.Test
                 
                 """;
 
-            var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            var sb = new StringBuilderWrapper();
+            OutputArgsDataBuilder.GetOptionDeclaration(sb, propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }
@@ -146,8 +146,8 @@ namespace DragonFruit2.Generators.Test
                 
                 """;
 
-            var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            var sb = new StringBuilderWrapper();
+            OutputArgsDataBuilder.GetOptionDeclaration(sb, propInfo);
 
             Assert.Equal(expected, sb.ToString());
 
@@ -175,8 +175,8 @@ namespace DragonFruit2.Generators.Test
 
                 """;
 
-            var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            var sb = new StringBuilderWrapper();
+            OutputArgsDataBuilder.GetOptionDeclaration(sb, propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }
@@ -202,8 +202,8 @@ namespace DragonFruit2.Generators.Test
 
                 """;
 
-            var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            var sb = new StringBuilderWrapper();
+            OutputArgsDataBuilder.GetOptionDeclaration(sb, propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }
@@ -229,8 +229,8 @@ namespace DragonFruit2.Generators.Test
 
                 """;
 
-            var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            var sb = new StringBuilderWrapper();
+            OutputArgsDataBuilder.GetOptionDeclaration(sb, propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }
@@ -257,8 +257,8 @@ namespace DragonFruit2.Generators.Test
                 
                 """;
 
-            var sb = new StringBuilder();
-            DragonFruit2Builder.GetOptionDeclaration(sb, propInfo);
+            var sb = new StringBuilderWrapper();
+            OutputArgsDataBuilder.GetOptionDeclaration(sb, propInfo);
 
             Assert.Equal(expected, sb.ToString());
         }

@@ -104,7 +104,11 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
 
         protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<MyArgs> builder)
         {
-            throw new NotImplementedException();
+            var validationFailures = new List<ValidationFailure?>();
+            validationFailures.Add(CheckRequiredValue<string>("Name", builder.GetDataValue<string>("Name")));
+            return validationFailures
+                    .Where(x => x is not null)
+                    .Select(x => x!);
         }
 
         protected override MyArgs CreateInstance(Builder<MyArgs> builder)
