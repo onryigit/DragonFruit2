@@ -11,51 +11,9 @@ namespace SampleConsoleApp;
 /// <summary>
 /// 
 /// </summary>
-public partial class MyArgs : IArgs<MyArgs>
+public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
 {
     private List<Validator<int>>? ageValidators;
-
-    public List<ValidationFailure> ValidationFailures { get; } = [];
-    public bool IsValid => !ValidationFailures.Any();
-
-    public static void Initialize(Builder<MyArgs> builder)
-    {
-        var cliDataProvider = builder.DataProviders.OfType<CliDataProvider<MyArgs>>().FirstOrDefault();
-        if (cliDataProvider is null)
-        {
-            cliDataProvider = new CliDataProvider<MyArgs>();
-            builder.DataProviders.Add(cliDataProvider);
-        }
-
-        var rootCommand = new System.CommandLine.Command("Test")
-        {
-            Description = "This is a test command"
-        };
-        var nameOption = new Option<string>("--name")
-        {
-            Description = "Your name",
-            Required = true
-        };
-        cliDataProvider.AddNameLookup(nameof(Name), nameOption);
-        rootCommand.Add(nameOption);
-
-        var ageOption = new Option<System.Int32>("--age")
-        {
-            Description = "Your Age"
-        };
-        cliDataProvider.AddNameLookup(nameof(Age), ageOption);
-        rootCommand.Add(ageOption);
-
-        var greetingOption = new Option<System.String>("--greeting")
-        {
-            Description = "Greeting message"
-        };
-        cliDataProvider.AddNameLookup(nameof(Greeting), greetingOption);
-        rootCommand.Add(greetingOption);
-
-        rootCommand.Add(new System.CommandLine.Command("TestChild"));
-        cliDataProvider.RootCommand = rootCommand;
-    }
 
     // Only generate the following constructor if there are no other constructors defined (possibly via partial constructor)
     public MyArgs()
@@ -69,25 +27,10 @@ public partial class MyArgs : IArgs<MyArgs>
         if (nameDataValue.IsSet) Name = nameDataValue.Value;
         if (ageDataValue.IsSet) Age = ageDataValue.Value;
         if (greetingDataValue.IsSet) Greeting = greetingDataValue.Value;
-
-
     }
 
-    public static MyArgs Create(Builder<MyArgs> builder)
-    {
-        var nameDataValue = builder.GetDataValue<string>("Name");
-        var ageDataValue = builder.GetDataValue<Int32>("Age");
-        var greetingDataValue = builder.GetDataValue<string>("Greeting");
 
-        var newArgs = new MyArgs(nameDataValue, ageDataValue, greetingDataValue);
-
-        var newFailures = newArgs.Validate();
-        newArgs.ValidationFailures.AddRange(newFailures);
-
-        return newArgs;
-    }
-
-    public IEnumerable<ValidationFailure> Validate()
+    public override IEnumerable<ValidationFailure> Validate()
     {
         var failures = new List<ValidationFailure>();
         InitializeValidators();
@@ -117,4 +60,59 @@ public partial class MyArgs : IArgs<MyArgs>
 
         // Other properties do not have validation, so their validators remain null.
     }
+
+    public static DataBuilder<MyArgs> GetDataBuilder(Builder<MyArgs> builder)
+    {
+        return new MyArgs.MyArgsDataBuilder();
+    }
+
+    public class MyArgsDataBuilder : DataBuilder<MyArgs>
+    {
+        public override void Initialize(Builder<MyArgs> builder)
+        {
+            var cliDataProvider = GetCliDataProvider(builder);
+
+            var rootCommand = new System.CommandLine.Command("Test")
+            {
+                Description = "This is a test command"
+            };
+            var nameOption = new Option<string>("--name")
+            {
+                Description = "Your name",
+                Required = true
+            };
+            cliDataProvider.AddNameLookup(nameof(MyArgs.Name), nameOption);
+            rootCommand.Add(nameOption);
+
+            var ageOption = new Option<System.Int32>("--age")
+            {
+                Description = "Your Age"
+            };
+            cliDataProvider.AddNameLookup(nameof(MyArgs.Age), ageOption);
+            rootCommand.Add(ageOption);
+
+            var greetingOption = new Option<System.String>("--greeting")
+            {
+                Description = "Greeting message"
+            };
+            cliDataProvider.AddNameLookup(nameof(MyArgs.Greeting), greetingOption);
+            rootCommand.Add(greetingOption);
+
+            rootCommand.Add(new System.CommandLine.Command("TestChild"));
+            cliDataProvider.RootCommand = rootCommand;
+        }
+
+        protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<MyArgs> builder)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override MyArgs CreateInstance(Builder<MyArgs> builder)
+            => new MyArgs(
+                    builder.GetDataValue<string>("Name"),
+                    builder.GetDataValue<Int32>("Age"),
+                    builder.GetDataValue<string>("Greeting")
+                );
+    }
 }
+

@@ -1,7 +1,7 @@
 ﻿namespace DragonFruit2;
 
 public class Builder<TArgs>
-    where TArgs : IArgs<TArgs>
+    where TArgs : Args<TArgs>, IArgs<TArgs>
 {
     public Builder()
     {
@@ -35,15 +35,15 @@ public class Builder<TArgs>
     }
 
 
-    public TArgs ParseArgs(string[] args)
+    public DataValues<TArgs> ParseArgs(string[] args)
     {
-        TArgs.Initialize(this);
+        var dataBuilder  = TArgs.GetDataBuilder(this);
+        dataBuilder.Initialize(this);
 
         var cliDataProvider = DataProviders.OfType<CliDataProvider<TArgs>>().FirstOrDefault()
             ?? throw new InvalidOperationException("Internal error: CliDataProvider not found");
         cliDataProvider.InputArgs = args;
-        var argsObject = TArgs.Create(this);
-        // Validate
-        return argsObject;
+        var argsDataValues = dataBuilder.Create(this);
+        return argsDataValues;
     }
 }

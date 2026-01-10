@@ -14,9 +14,9 @@ public readonly record struct DataValue<T>
         SetBy = setBy;
     }
 
-    public T? Value { get; }
+    public T Value { get; }
 
-    public DataProvider? SetBy { get; }
+    public DataProvider SetBy { get; }
 
     public bool IsSet => SetBy is not null;
 }

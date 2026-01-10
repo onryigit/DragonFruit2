@@ -1,4 +1,5 @@
 ﻿namespace DragonFruit2.Validators;
+//
 
 public record class ValidationFailure { }
 

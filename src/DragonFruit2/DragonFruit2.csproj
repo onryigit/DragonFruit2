@@ -9,7 +9,6 @@
 
 		<!--<IncludeBuildOutput>false</IncludeBuildOutput>-->
 
-		<!-- Optional package metadata (adjust as needed) -->
 		<PackageId>DragonFruit2</PackageId>
 		<Version>0.1.0-beta-003</Version>
 		<Authors>Kathleen Dollard</Authors>

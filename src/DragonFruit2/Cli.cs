@@ -8,15 +8,15 @@ public static class Cli
     /// <typeparam name="TArgs">The type containing the CLI definition</typeparam>
     /// <param name="args">Optionaly pass the commandline args</param>
     /// <returns></returns>
-    public static TArgs? ParseArgs<TArgs>(string[]? args = null)
-        where TArgs : IArgs<TArgs>
+    public static DataValues<TArgs> ParseArgs<TArgs>(string[]? args = null)
+        where TArgs : Args<TArgs>, IArgs<TArgs>
     {
         args ??= Environment.GetCommandLineArgs();
 
-        var argsObject = new Builder<TArgs>().ParseArgs(args);
+        var argsDataValues = new Builder<TArgs>().ParseArgs(args);
 
 
-        return argsObject;
+        return argsDataValues;
 
     }
 }

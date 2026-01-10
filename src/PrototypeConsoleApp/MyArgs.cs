@@ -22,4 +22,6 @@ public partial class MyArgs
     /// "Greeting message"
     /// </summary>
     public string Greeting { get; init; } = string.Empty;
+
+
 }

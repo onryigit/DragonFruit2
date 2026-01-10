@@ -3,12 +3,8 @@
 namespace DragonFruit2;
 
 public class CliDataProvider<TArgs> : DataProvider
-            where TArgs : IArgs<TArgs>
+            where TArgs : Args<TArgs>
 {
-    //public CliDataProvider(string[] inputArgs)
-    //{
-    //    InputArgs = inputArgs ?? System.Environment.GetCommandLineArgs();
-    //}
 
     public string[] InputArgs
     {
