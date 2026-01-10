@@ -194,7 +194,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
                 OpenCurly(sb);
                 sb.AppendLine($"""{indent}foreach (var validator in {localSymbolName}Validators)""");
                 OpenCurly(sb);
-                sb.AppendLine($"""{indent}failures.Concat(validator.Validate({prop.Name}));""");
+                sb.AppendLine($"""{indent}failures.AddRange(validator.Validate({prop.Name}));""");
                 CloseCurly(sb);
                 CloseCurly(sb);
             }
@@ -234,8 +234,9 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
                 sb.Append(", ");
         }
         sb.AppendLine(");");
-        sb.AppendLine(); 
-        sb.AppendLine($"""{indent}newArgs.ValidationFailures.Concat(newArgs.Validate());""");
+        sb.AppendLine();
+        sb.AppendLine($"""{indent}var newFailures = newArgs.Validate();""");
+        sb.AppendLine($"""{indent}newArgs.ValidationFailures.AddRange(newFailures);""");
         sb.AppendLine();
         sb.AppendLine($"""{indent}return newArgs;""");
         CloseCurly(sb);
