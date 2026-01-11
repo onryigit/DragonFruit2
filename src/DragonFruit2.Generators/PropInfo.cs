@@ -27,7 +27,7 @@ public record class PropInfo
     public bool IsArgument { get; init; }
 
     // If position is not set for all arguments, the argument order is indeterminiate
-    public int Position { get; init; } = -1;
+    public int Position { get; init; }
     public bool HasInitializer { get; init; }
     public string? InitializerText { get; init; }
     public bool IsRequiredForCli 

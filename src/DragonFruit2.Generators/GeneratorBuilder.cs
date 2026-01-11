@@ -6,7 +6,7 @@ public abstract class GeneratorBuilder<T>
 {
     public abstract bool InitialFilter(SyntaxNode node);
     public abstract T? Transform(GeneratorSyntaxContext context);
-    public abstract void OutputSource(SourceProductionContext context, IEnumerable<T> items);
+    public abstract IEnumerable<(string hintName, string code)> OutputSource(SourceProductionContext context, IEnumerable<T> items);
 
 
 }

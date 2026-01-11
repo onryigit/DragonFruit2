@@ -63,11 +63,13 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
 
     public static ArgsBuilder<MyArgs> GetArgsBuilder(Builder<MyArgs> builder)
     {
-        return new MyArgs.MyArgsDataBuilder();
+        return new MyArgs.MyArgsBuilder();
     }
 
-    public class MyArgsDataBuilder : ArgsBuilder<MyArgs>
+    public class MyArgsBuilder : ArgsBuilder<MyArgs>
     {
+        public ArgsBuilder<MyArgs>? ActiveArgsBuilder { get; set; }
+
         public override void Initialize(Builder<MyArgs> builder)
         {
             var cliDataProvider = GetCliDataProvider(builder);
@@ -97,6 +99,8 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
             };
             cliDataProvider.AddNameLookup(nameof(MyArgs.Greeting), greetingOption);
             rootCommand.Add(greetingOption);
+
+            rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });
 
             rootCommand.Add(new System.CommandLine.Command("TestChild"));
             cliDataProvider.RootCommand = rootCommand;

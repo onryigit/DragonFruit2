@@ -11,13 +11,14 @@ public partial class SubCommandArgs
     /// "Your name"
     /// </summary>
     public required string Name { get; set; }
+    public string Greeting { get; set; } = "Hello";
 }
 
-public partial class MorningGreetingArgs : SubCommandArgs
+public partial class MorningArgs : SubCommandArgs
 {
 }
 
-public partial class EveningGreetingArgs : SubCommandArgs
+public partial class EveningArgs : SubCommandArgs
 {
 
     /// <summary>

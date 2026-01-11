@@ -9,7 +9,7 @@ public sealed class ArgumentAttribute : Attribute
     /// <summary>
     /// Zero-based position of the argument. Use -1 (default) to indicate unspecified.
     /// </summary>
-    public int Position { get; set; } = -1;
+    public int Position { get; set; }
 
     public ArgumentAttribute() { }
 

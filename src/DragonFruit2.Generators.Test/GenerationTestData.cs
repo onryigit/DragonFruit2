@@ -192,6 +192,132 @@ public class CommandInfoTheoryData : TheoryData<string, string, string, CommandI
             
             """);
 
+
+        Add("SubCommands",
+                """
+                namespace MyNamespace
+                {
+                    public partial class MyArgs
+                    {
+                        public required string Name { get; set; }
+                    }
+
+                    public partial class MorningGreetingArgs : MyArgs
+                    {
+                    }
+
+                    public partial class EveningGreetingArgs : MyArgs
+                    {
+                        public int Age { get; init; } = 1;
+                    }
+                }
+                """,
+                TestHelpers.EmptyConsoleAppCodeWithArgsMyNamespace,
+                GetSubCommandCommandInfo(),
+                ""
+                );
+
+        Add("DeepSubCommands",
+                """
+                namespace MyNamespace
+                {
+                    public partial class MyArgs
+                    {
+                        public required string Name { get; set; }
+                    }
+
+                    public partial class MorningGreetingArgs : MyArgs
+                    {
+                    }
+
+                    public partial class EveningGreetingArgs : MyArgs
+                    {
+                        public int Age { get; init; } = 1;
+                    }
+                    public partial class Bar : EveningGreetingArgs
+                    {
+                    }
+                }
+                """,
+                TestHelpers.EmptyConsoleAppCodeWithArgsMyNamespace,
+                GetDeepSubCommandsCommandInfo(),
+                ""
+                );
+
+        static CommandInfo GetSubCommandCommandInfo()
+        {
+            var subCommandsCommandInfo = new CommandInfo()
+            {
+                Name = "MyArgs",
+                NamespaceName = "MyNamespace",
+            };
+            subCommandsCommandInfo.Options.Add(new PropInfo()
+            {
+                Name = "Name",
+                TypeName = "string",
+                HasRequiredModifier = true,
+            });
+            subCommandsCommandInfo.SubCommands.Add(
+                        new CommandInfo()
+                        {
+                            Name = "MorningGreetingArgs",
+                            NamespaceName = "MyNamespace",
+                        });
+            var subCommandsEveningCommandInfo = new CommandInfo()
+            {
+                Name = "EveningGreetingArgs",
+                NamespaceName = "MyNamespace",
+            };
+            subCommandsEveningCommandInfo.Options.Add(new PropInfo()
+            {
+                Name = "Age",
+                TypeName = "int",
+                HasRequiredModifier = false,
+            });
+            subCommandsCommandInfo.SubCommands.Add(subCommandsEveningCommandInfo);
+
+            return subCommandsCommandInfo;
+        }
+
+        static CommandInfo GetDeepSubCommandsCommandInfo()
+        {
+            var deepSubCommandInfo = new CommandInfo()
+            {
+                Name = "MyArgs",
+                NamespaceName = "MyNamespace",
+            };
+            deepSubCommandInfo.Options.Add(new PropInfo()
+            {
+                Name = "Name",
+                TypeName = "string",
+                HasRequiredModifier = true,
+            });
+            deepSubCommandInfo.SubCommands.Add(
+                        new CommandInfo()
+                        {
+                            Name = "MorningGreetingArgs",
+                            NamespaceName = "MyNamespace",
+                        });
+            var deepSubCommandsEveningCommandInfo = new CommandInfo()
+            {
+                Name = "EveningGreetingArgs",
+                NamespaceName = "MyNamespace",
+            };
+            deepSubCommandsEveningCommandInfo.Options.Add(new PropInfo()
+            {
+                Name = "Age",
+                TypeName = "int",
+                HasRequiredModifier = false,
+            });
+            var deeperSubCommandsEveningCommandInfo = new CommandInfo()
+            {
+                Name = "Bar",
+                NamespaceName = "MyNamespace",
+            };
+            deepSubCommandsEveningCommandInfo.SubCommands.Add(deeperSubCommandsEveningCommandInfo);
+            deepSubCommandInfo.SubCommands.Add(deepSubCommandsEveningCommandInfo);
+            return deepSubCommandInfo;
+        }
     }
 
 }

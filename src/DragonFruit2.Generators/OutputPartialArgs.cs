@@ -4,7 +4,7 @@ namespace DragonFruit2.Generators;
 
 internal class OutputPartialArgs
 {
-    internal static string GetSourcePartialArgs(CommandInfo commandInfo)
+    internal static void GetSourcePartialArgs(CommandInfo commandInfo, List<(string hintName, string code)> outputStrings)
     {
         var sb = new StringBuilderWrapper();
         FileOpening(sb);
@@ -13,10 +13,8 @@ internal class OutputPartialArgs
         OpenClass(commandInfo, sb);
 
         FieldsAndProperties(sb, commandInfo);
-        //OutputInitializeMethod(commandInfo, sb); // moved to builder
         sb.AppendLine();
         Constructors(sb, commandInfo);
-        //OutputStaticCreateMethods(commandInfo, sb); // moved to builder
         ValidateMethod(sb, commandInfo);
         InitializeValidatorsMethod(sb, commandInfo);
         GetArgsBuilder(sb, commandInfo);
@@ -25,7 +23,12 @@ internal class OutputPartialArgs
 
         sb.CloseClass();
         sb.CloseNamespace(commandInfo.NamespaceName);
-        return sb.ToString();
+
+        outputStrings.Add((hintName: commandInfo.Name, code: sb.ToString()));
+        foreach (var subCommand in commandInfo.SubCommands)
+        {
+            GetSourcePartialArgs(subCommand, outputStrings);
+        }
     }
 
     private static void FileOpening(StringBuilderWrapper sb)

@@ -11,7 +11,10 @@
     <File Path="../docs/_Overview.md" />
   </Folder>
   <Folder Name="/Solution Items/">
+    <File Path="../.gitattributes" />
+    <File Path="../.gitignore" />
     <File Path="../ReadMe.md" />
+    <File Path=".editorconfig" />
     <File Path="Directory.Build.props" />
   </Folder>
   <Project Path="DragonFruit2.Generators.Test/DragonFruit2.Generators.Test.csproj" Id="513239eb-873d-4d57-b95d-43eff3f81bbd" />

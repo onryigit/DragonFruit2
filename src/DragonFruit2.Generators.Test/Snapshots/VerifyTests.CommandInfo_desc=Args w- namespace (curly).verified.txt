@@ -1,0 +1,6 @@
+﻿{
+  Name: MyArgs,
+  NamespaceName: MyNamespace,
+  IsStruct: false,
+  PropInfos: []
+}

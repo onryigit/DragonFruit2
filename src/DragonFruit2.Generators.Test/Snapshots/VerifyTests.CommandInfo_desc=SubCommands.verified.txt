@@ -1,0 +1,74 @@
+﻿{
+  Name: MyArgs,
+  NamespaceName: MyNamespace,
+  IsStruct: false,
+  Options: [
+    {
+      Name: Name,
+      CliName: name,
+      TypeName: string,
+      IsValueType: false,
+      HasRequiredModifier: true,
+      HasArgumentAttribute: false,
+      IsArgument: false,
+      HasInitializer: false,
+      IsRequiredForCli: true
+    }
+  ],
+  PropInfos: [
+    {
+      Name: Name,
+      CliName: name,
+      TypeName: string,
+      IsValueType: false,
+      HasRequiredModifier: true,
+      HasArgumentAttribute: false,
+      IsArgument: false,
+      HasInitializer: false,
+      IsRequiredForCli: true
+    }
+  ],
+  SubCommands: [
+    {
+      Name: MorningGreetingArgs,
+      NamespaceName: MyNamespace,
+      IsStruct: false,
+      PropInfos: []
+    },
+    {
+      Name: EveningGreetingArgs,
+      NamespaceName: MyNamespace,
+      IsStruct: false,
+      Options: [
+        {
+          Name: Age,
+          CliName: age,
+          TypeName: int,
+          IsValueType: true,
+          NullableAnnotation: NotAnnotated,
+          HasRequiredModifier: false,
+          HasArgumentAttribute: false,
+          IsArgument: false,
+          HasInitializer: true,
+          InitializerText: 1,
+          IsRequiredForCli: false
+        }
+      ],
+      PropInfos: [
+        {
+          Name: Age,
+          CliName: age,
+          TypeName: int,
+          IsValueType: true,
+          NullableAnnotation: NotAnnotated,
+          HasRequiredModifier: false,
+          HasArgumentAttribute: false,
+          IsArgument: false,
+          HasInitializer: true,
+          InitializerText: 1,
+          IsRequiredForCli: false
+        }
+      ]
+    }
+  ]
+}

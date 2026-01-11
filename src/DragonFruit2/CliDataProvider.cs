@@ -12,20 +12,23 @@ public class CliDataProvider<TArgs> : DataProvider
         set
         {
             field = value;
-            ParseResult = null;
+            ParseResult = RootCommand?.Parse(InputArgs);
+            ParseResult?.Invoke();
         }
     }
     public Command? RootCommand
     {
         get;
-        set
-        {
-            field = value;
-            field?.SetAction(parseResult =>
-            {
-                return 0;
-            });
-        }
+        set;
+        //{
+        //    field = value;
+        //    field?.SetAction(parseResult =>
+        //    {
+        //        var parseResult = RootCommand?.Parse(InputArgs);
+        //        parseResult.Invoke();
+        //        return 0;
+        //    });
+        //}
     }
 
     public ParseResult? ParseResult

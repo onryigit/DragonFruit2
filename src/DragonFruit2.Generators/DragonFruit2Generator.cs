@@ -18,6 +18,10 @@ namespace DragonFruit2.Generators
                 .Select(static (s, _) => s!) // Quiet nullability warning
                 .Collect();
 
+            var allCommandInfos = parseArgsInvocations.SelectMany(static (collected, _) => 
+            collected)
+                .WithTrackingName("AllCommandInfos");
+
             context.RegisterSourceOutput(parseArgsInvocations, static (spc, collected) =>
             {
                 builder.OutputSource(spc, collected);

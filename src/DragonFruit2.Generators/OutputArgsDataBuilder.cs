@@ -26,6 +26,7 @@ internal static class OutputArgsBuilder
                 "/// </summary>",
                 $"internal class {commandInfo.Name}ArgsBuilder : ArgsBuilder<{commandInfo.Name}>"]);
         sb.OpenCurly();
+        sb.AppendLine($$"""public ArgsBuilder<{{commandInfo.Name}}>? ActiveArgsBuilder { get; set; }""");
     }
 
     private static void Initialize(StringBuilderWrapper sb, CommandInfo commandInfo)
@@ -55,6 +56,8 @@ internal static class OutputArgsBuilder
         {
             GetSubCommandDeclaration(sb, subcommand);
         }
+
+        sb.AppendLine("rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });");
         sb.AppendLine($"""cliDataProvider.RootCommand = rootCommand;""");
 
         sb.CloseMethod();
@@ -96,8 +99,8 @@ internal static class OutputArgsBuilder
 
     internal static void GetSubCommandDeclaration(StringBuilderWrapper sb, CommandInfo commandInfo)
     {
-        string symbolName = $"{OutputHelpers.GetLocalSymbolName(commandInfo.Name)}Command";
-        sb.AppendLine($"""{symbolName}Command = new System.CommandLine.Command("Root")""");
+        string symbolName = $"{OutputHelpers.GetLocalSymbolName(commandInfo.Name)}";
+        sb.AppendLine($"""{symbolName}Command = new System.CommandLine.Command("{(commandInfo.Name ?? "Root")}");""");
         AddSymbolToRootCommand(sb, symbolName);
     }
 

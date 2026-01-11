@@ -43,13 +43,14 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
                 _ => null,
             };
 
-    public override void OutputSource(SourceProductionContext context, IEnumerable<CommandInfo> items)
+    public override IEnumerable<(string hintName, string code)> OutputSource(SourceProductionContext context, IEnumerable<CommandInfo> items)
     {
+        var sourceTexts = new List<(string hintName, string code)>();
         foreach (var commandInfo in items)
         {
-            var sourceText = GetSourceForCommandInfo(commandInfo);
-            context.AddSource($"{commandInfo.Name}_ParseArgsGenerator.g.cs", sourceText);
+             GetSourceForCommandInfo(commandInfo, sourceTexts);
         }
+        return sourceTexts;
     }
 
 
@@ -131,7 +132,8 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         return semanticModel.GetSymbolInfo(typeArgSyntax).Symbol as INamedTypeSymbol;
     }
 
-    internal static string GetSourceForCommandInfo(CommandInfo commandInfo) 
-        => OutputPartialArgs.GetSourcePartialArgs(commandInfo);
-
+    internal static void GetSourceForCommandInfo(CommandInfo commandInfo,List<(string hintName, string code)> outputStrings)
+    {
+        OutputPartialArgs.GetSourcePartialArgs(commandInfo, outputStrings);
+    }
 }
