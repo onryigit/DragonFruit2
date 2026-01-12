@@ -13,7 +13,7 @@ public class CliDataProvider<TArgs> : DataProvider
         {
             field = value;
             ParseResult = RootCommand?.Parse(InputArgs);
-            ParseResult?.Invoke();
+            var x = ParseResult?.Invoke();
         }
     }
     public Command? RootCommand

@@ -68,7 +68,7 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
 
     public class MyArgsBuilder : ArgsBuilder<MyArgs>
     {
-        public override void Initialize(Builder<MyArgs> builder, bool isRoot = false)
+        public override Command Initialize(Builder<MyArgs> builder)
         {
             var cliDataProvider = GetCliDataProvider(builder);
 
@@ -100,8 +100,7 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
 
             rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });
 
-            rootCommand.Add(new System.CommandLine.Command("TestChild"));
-            cliDataProvider.RootCommand = rootCommand;
+            return rootCommand;
         }
 
         protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<MyArgs> builder)

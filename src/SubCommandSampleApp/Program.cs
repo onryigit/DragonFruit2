@@ -43,11 +43,9 @@ static int MorningGreeting(MorningArgs morningArgs)
 
 static int EveningGreetingArgs(EveningArgs eveningArgs)
 {
-    {
         var drink = ", would you like some wine?.";
         var noDrink = ".";
         Console.WriteLine($"{eveningArgs.Greeting} {eveningArgs.Name}{(eveningArgs.Age >= 18 ? drink : noDrink)}");
-    }
     return 0;
 }
 

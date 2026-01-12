@@ -34,11 +34,11 @@ internal static class OutputArgsBuilder
         var commandDescription = commandInfo.Description is null
                                   ? "null"
                                   : $"\"{commandInfo.Description.Replace("\"", "\"\"")}\"";
-        sb.OpenMethod($"""public override void Initialize(Builder<{commandInfo.RootName}> builder, bool isRoot=false)""");
+        sb.OpenMethod($"""public override Command Initialize(Builder<{commandInfo.RootName}> builder)""");
 
         sb.AppendLine($"""var cliDataProvider = GetCliDataProvider(builder);""");
 
-        sb.AppendLine($"""var cmd = new System.CommandLine.Command("{commandInfo.Name}")""");
+        sb.AppendLine($"""var cmd = new System.CommandLine.Command("{commandInfo.CliName}")""");
         sb.OpenCurly();
         sb.AppendLine($"""Description = {commandDescription},""");
         sb.CloseCurly(endStatement: true);
@@ -57,10 +57,10 @@ internal static class OutputArgsBuilder
             GetSubCommandDeclaration(sb, subcommand);
         }
 
-        sb.AppendLine("cmd.SetAction(p => { ActiveArgsBuilder = this; return 0; });");
-        sb.OpenIf("isRoot");
-        sb.AppendLine($"""cliDataProvider.RootCommand = cmd;""");
-        sb.CloseIf();
+        sb.AppendLine($$"""cmd.SetAction(p => { ActiveArgsBuilder = this; return {{commandInfo.Name.Length + commandInfo.BaseName?.Length}}; });""");
+
+        sb.AppendLine("return cmd;");
+
 
         sb.CloseMethod();
     }
@@ -78,9 +78,10 @@ internal static class OutputArgsBuilder
                 $"""Required = {(propInfo.IsRequiredForCli ? "true" : "false")},""",
                 "Recursive=true"]);
         sb.CloseCurly(endStatement: true);
-
         AddSymbolToLookup(sb, propInfo, symbolName);
         sb.AppendLine($"""cmd.Add({symbolName});""");
+        sb.AppendLine();
+
     }
 
     internal static void GetArgumentDeclaration(StringBuilderWrapper sb, PropInfo propInfo)
@@ -98,15 +99,15 @@ internal static class OutputArgsBuilder
         sb.CloseCurly(true, endStatement: true);
         AddSymbolToLookup(sb, propInfo, symbolName);
         sb.AppendLine($"""cmd.Add({symbolName});""");
+        sb.AppendLine();
     }
 
     internal static void GetSubCommandDeclaration(StringBuilderWrapper sb, CommandInfo commandInfo)
     {
         string symbolName = $"{OutputHelpers.GetLocalSymbolName(commandInfo.Name)}Command";
-        sb.AppendLine($"""var {symbolName} = new System.CommandLine.Command("{commandInfo.CliName ?? "Root"}");""");
-        sb.AppendLine($"{commandInfo.Name}.GetArgsBuilder(builder).Initialize(builder);");
-
+        sb.AppendLine($"""var {symbolName} = {commandInfo.Name}.GetArgsBuilder(builder).Initialize(builder);""");
         sb.AppendLine($"""cmd.Add({symbolName});""");
+        sb.AppendLine();
     }
 
     private static void AddSymbolToLookup(StringBuilderWrapper sb, PropInfo propInfo, string symbolName)

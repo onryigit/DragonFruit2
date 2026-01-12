@@ -1,11 +1,18 @@
 ﻿using DragonFruit2.Validators;
+using System.CommandLine;
 
 namespace DragonFruit2;
 
-public abstract class ArgsBuilder<TArgs> 
+public abstract class ArgsBuilder<TArgs>
     where TArgs : Args<TArgs>, IArgs<TArgs>
 {
-    public static ArgsBuilder<TArgs>? ActiveArgsBuilder { get; set; }
+    private static ArgsBuilder<TArgs>? activeArgsBuilder;
+
+    public static ArgsBuilder<TArgs>? ActiveArgsBuilder
+    {
+        get => activeArgsBuilder; 
+        set => activeArgsBuilder = value;
+    }
 
     internal ArgsBuilder<TArgs>? GetActiveArgsBuilder => ActiveArgsBuilder;
 
@@ -19,7 +26,7 @@ public abstract class ArgsBuilder<TArgs>
         }
         return cliDataProvider;
     }
-    public abstract void Initialize(Builder<TArgs> builder, bool isRoot = false);
+    public abstract Command Initialize(Builder<TArgs> builder);
 
     public DataValues<TArgs> Create(Builder<TArgs> builder)
     {

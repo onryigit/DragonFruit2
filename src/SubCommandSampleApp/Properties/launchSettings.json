@@ -2,7 +2,7 @@
   "profiles": {
     "SubCommandSampleApp": {
       "commandName": "Project",
-      "commandLineArgs": "evening-args --name Kathleen --greeting Howdy"
+      "commandLineArgs": "evening-args --name Kathleen --greeting Howdy --age 34"
     }
   }
 }
