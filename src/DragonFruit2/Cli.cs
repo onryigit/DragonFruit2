@@ -35,7 +35,7 @@ public static class Cli
     public static Result<TRootArgs> ParseArgs<TRootArgs>(ArgsBuilder<TRootArgs> rootArgsBuilder, string[]? args = null)
         where TRootArgs : IArgs<TRootArgs>
     {
-        args ??= Environment.GetCommandLineArgs();
+        args ??= Environment.GetCommandLineArgs().Skip(1).ToArray();
 
         var argsDataValues = new Builder<TRootArgs>().ParseArgs(rootArgsBuilder, args);
 

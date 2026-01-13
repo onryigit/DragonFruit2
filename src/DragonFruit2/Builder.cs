@@ -1,4 +1,6 @@
-﻿namespace DragonFruit2;
+﻿using DragonFruit2.Validators;
+
+namespace DragonFruit2;
 
 public class Builder<TRootArgs>
     where TRootArgs : IArgs<TRootArgs>
@@ -45,14 +47,13 @@ public class Builder<TRootArgs>
             ?? throw new InvalidOperationException("Internal error: CliDataProvider not found");
         cliDataProvider.RootCommand = rootCommand;
         // Once you set the InputArgs, the provider can start parsing
-        cliDataProvider.SetInputArgs(args);
+        var (failures, activeArgsBuilder) = cliDataProvider.GetActiveArgsBuilder(args);
 
-        var activeArgsBuilder = ArgsBuilderCache<TRootArgs>.GetActiveArgsBuilder();
-        if (activeArgsBuilder is null)
+        return (failures, activeArgsBuilder) switch
         {
-            throw new InvalidOperationException("Handling failures in System.CommandLine is not yet implemented.");
-        }
-        var argsDataValues = activeArgsBuilder.CreateArgs(this);
-        return argsDataValues;
+            (not null, null) when failures.Any() => Result<TRootArgs>.CreateFailure(failures),
+            (_, null) => Result<TRootArgs>.CreateFailure([new ValidationFailure(ValidationId.UnknownParsingFailure.ToValidationIdString(), "Unknown Failure", "")]),
+            _ => activeArgsBuilder.CreateArgs(this)
+        };
     }
 }

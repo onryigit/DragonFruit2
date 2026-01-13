@@ -5,7 +5,14 @@ namespace DragonFruit2;
 public class Result<TArgs>
     where TArgs : IArgs<TArgs>
 {
-    public List<ValidationFailure> ValidationFailures = [];
+    public static Result<TArgs> CreateFailure(IEnumerable<ValidationFailure> failures)
+    {
+        var result = new Result<TArgs>();
+        result.ValidationFailures.AddRange(failures);
+        return result;
+    }
+
+    public readonly List<ValidationFailure> ValidationFailures = [];
     public bool IsValid => !ValidationFailures.Any();
     public TArgs? Args { get; set; }
 

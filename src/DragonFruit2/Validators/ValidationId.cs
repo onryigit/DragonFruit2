@@ -6,7 +6,12 @@ public enum ValidationId
     GreaterThanOrEqual = 2, 
     LessThan = 3,
     LessThanOrEqual = 4,
-    Required = 5
+    Required = 5,
+
+    SystemCommandLine = 100,
+    UnknownParsingFailure = 101,
+
+
 }
 
 public static class ValidationIdExtensions

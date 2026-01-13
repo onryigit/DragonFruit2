@@ -1,4 +1,7 @@
-﻿using System.CommandLine;
+﻿using DragonFruit2.Validators;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.CommandLine.Invocation;
 
 namespace DragonFruit2;
 
@@ -13,15 +16,31 @@ public class CliDataProvider<TRootArgs> : DataProvider
 
     }
 
-    internal void SetInputArgs(string[] args)
+    internal (IEnumerable<ValidationFailure>? failures, ArgsBuilder<TRootArgs>? builder) GetActiveArgsBuilder(string[] args)
     {
         {
             InputArgs = args;
             ParseResult = RootCommand?.Parse(InputArgs);
             ArgsBuilderCache<TRootArgs>.ActiveArgsBuilder = null;
-            var x = ParseResult?.Invoke();
+            var _ = ParseResult?.Invoke();
+            var failures = ParseResult is not null && ParseResult.Errors.Any()
+                            ? TransformErrors(ParseResult.Errors)
+                            : null;
+
+            return (failures, ArgsBuilderCache<TRootArgs>.GetActiveArgsBuilder());
         }
     }
+
+    private IEnumerable<ValidationFailure>? TransformErrors(IReadOnlyList<ParseError> errors)
+    {
+        return errors.Select(CreateValidationFailure);
+
+        static ValidationFailure CreateValidationFailure(ParseError error)
+            => new(ValidationId.SystemCommandLine.ToValidationIdString(),
+                   error.Message,
+                   string.Empty);
+    }
+
 
     public Command? RootCommand
     {
