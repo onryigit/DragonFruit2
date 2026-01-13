@@ -29,7 +29,7 @@ internal static class OutputArgsBuilder
 
     internal static void StaticConstructor(CommandInfo commandInfo, StringBuilderWrapper sb)
     {
-        sb.XmlSummary("This static builder supplies the CLI declaration and filling the DataValues and return instance.");
+        sb.XmlSummary("This static builder supplies the CLI declaration and filling the Result and return instance.");
         sb.XmlRemarks("The first type argument of the base is the Args type this builder creates, and the second is the root Args type. This means the two type arguments are the same for the root ArgsBuilder, but will differ for subcommand ArgsBuilders.");
         sb.OpenMethod($"""static {commandInfo.Name}ArgsBuilder()""");
         sb.AppendLine($"""ArgsBuilderCache<{commandInfo.RootName}>.AddArgsBuilder<{commandInfo.Name}> (new {commandInfo.Name}ArgsBuilder());""");

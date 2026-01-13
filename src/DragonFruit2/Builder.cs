@@ -35,7 +35,7 @@ public class Builder<TRootArgs>
     }
 
 
-    public DataValues<TRootArgs> ParseArgs(ArgsBuilder<TRootArgs> argsBuilder, string[] args)
+    public Result<TRootArgs> ParseArgs(ArgsBuilder<TRootArgs> argsBuilder, string[] args)
     {
         //var argsBuilder = ArgsBuilderCache<TRootArgs>.GetArgsBuilder<TRootArgs>();
         // The entire CLI tree is built from the TRootArgs

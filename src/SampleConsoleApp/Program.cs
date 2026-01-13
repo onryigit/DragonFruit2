@@ -14,10 +14,7 @@ if (myArgsDataValues.IsValid)
 }
 else
 {
-    foreach (var failure in myArgsDataValues.ValidationFailures)
-    {
-        Console.WriteLine($"Error: {failure.Message}");
-    }
+    myArgsDataValues.ReportErrorsToConsole();
 }
 Console.WriteLine();
 

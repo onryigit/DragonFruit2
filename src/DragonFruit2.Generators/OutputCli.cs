@@ -39,13 +39,13 @@ public class OutputCli
                 "/// <summary>",
                 $"""/// Auto-generated partial class that supplies the root ArgsBuilder.""",
                 "/// </summary>",
-                "public class Cli"]);
+                $"{commandInfo.ArgsAccessibility} class Cli"]);
         sb.OpenCurly();
     }
 
     private static void ParseArgsMethod(CommandInfo commandInfo, StringBuilderWrapper sb)
     {
-        sb.OpenMethod($"public static DataValues<{commandInfo.Name}> ParseArgs<TRootArgs>(string[]? args = null)",
+        sb.OpenMethod($"public static Result<{commandInfo.Name}> ParseArgs<TRootArgs>(string[]? args = null)",
             constraints: "TRootArgs : IArgs<TRootArgs>");
         sb.AppendLine($"return DragonFruit2.Cli.ParseArgs<{commandInfo.Name}>(new {commandInfo.Name}.{commandInfo.Name}ArgsBuilder(), args);");
         sb.CloseMethod();

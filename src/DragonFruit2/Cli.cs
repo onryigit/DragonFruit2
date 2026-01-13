@@ -13,8 +13,8 @@ public static class Cli
     /// </remarks>
     /// <typeparam name="TRootArgs">The type containing the CLI definition</typeparam>
     /// <param name="args">Optionaly pass the commandline args</param>
-    /// <returns>A DataValues instance containing the hydrated args or error messages.</returns>
-    public static DataValues<TRootArgs> ParseArgs<TRootArgs>(string[]? args = null)
+    /// <returns>A Result instance containing the hydrated args or error messages.</returns>
+    public static Result<TRootArgs> ParseArgs<TRootArgs>(string[]? args = null)
         where TRootArgs : IArgs<TRootArgs>
     {
         throw new InvalidOperationException("This method is a stub for source generation. If you see this error, there is probably a problem with source generation.");
@@ -32,7 +32,7 @@ public static class Cli
     /// <typeparam name="TRootArgs">The type containing the CLI definition</typeparam>
     /// <param name="args">Optionaly pass the commandline args</param>
     /// <returns></returns>
-    public static DataValues<TRootArgs> ParseArgs<TRootArgs>(ArgsBuilder<TRootArgs> rootArgsBuilder, string[]? args = null)
+    public static Result<TRootArgs> ParseArgs<TRootArgs>(ArgsBuilder<TRootArgs> rootArgsBuilder, string[]? args = null)
         where TRootArgs : IArgs<TRootArgs>
     {
         args ??= Environment.GetCommandLineArgs();

@@ -13,7 +13,7 @@ if (myArgsDataValues.IsValid)
 }
 else
 {
-    // Display validation errors
+    myArgsDataValues.ReportErrorsToConsole();
 }
 
 Console.WriteLine("Goodbye from the Sample Console App!");

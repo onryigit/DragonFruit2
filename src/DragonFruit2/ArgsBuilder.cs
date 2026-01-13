@@ -45,9 +45,9 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
 
     protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(Builder<TRootArgs> builder);
 
-    public DataValues<TRootArgs> CreateArgs(Builder<TRootArgs> builder)
+    public Result<TRootArgs> CreateArgs(Builder<TRootArgs> builder)
     {
-        var dataValues = new DataValues<TRootArgs>();
+        var dataValues = new Result<TRootArgs>();
         dataValues.ValidationFailures.AddRange(CheckRequiredValues(builder));
         if (dataValues.IsValid)
         {

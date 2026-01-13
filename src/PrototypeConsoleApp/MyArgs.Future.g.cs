@@ -67,7 +67,7 @@ public partial class MyArgs : IArgs<MyArgs>
     }
 
     /// <summary>
-    /// This static builder supplies the CLI declaration and filling the DataValues and 
+    /// This static builder supplies the CLI declaration and filling the Result and 
     /// return instance.
     /// </summary>
     /// <remarks>
@@ -136,7 +136,7 @@ public partial class MyArgs : IArgs<MyArgs>
         }
     }
 
-    public class MyArgsDataValues : DataValues<MyArgs>
+    public class MyArgsDataValues : Result<MyArgs>
     {
         public MyArgsDataValues(Builder<MyArgs> builder)
         {

@@ -18,10 +18,7 @@ if (subcommandArgsDataValues.IsValid)
 }
 else
 {
-    foreach (var failure in subcommandArgsDataValues.ValidationFailures)
-    {
-        Console.WriteLine($"Error: {failure.Message}");
-    }
+    subcommandArgsDataValues.ReportErrorsToConsole();
 }
 
 return 1;
