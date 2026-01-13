@@ -4,10 +4,11 @@ public static class Cli
 {
 
     /// <summary>
+    /// Parses CLI arguments to fill the specified args type. You must build after first creating this line.
     /// </summary>
     /// <typeparam name="TRootArgs">The type containing the CLI definition</typeparam>
     /// <param name="args">Optionaly pass the commandline args</param>
-    /// <returns></returns>
+    /// <returns>A DataValues instance containing the hydrated args or error messages.</returns>
     public static DataValues<TRootArgs> ParseArgs<TRootArgs>(string[]? args = null)
         where TRootArgs : Args<TRootArgs>
     {
