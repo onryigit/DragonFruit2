@@ -10,10 +10,8 @@ internal static class OutputArgsBuilder
         OpenClass(commandInfo, sb);
 
         Initialize(sb, commandInfo);
-        //OutputInitializeMethod(commandInfo, sb); // moved to builder
         sb.AppendLine();
         CheckRequiredValues(sb, commandInfo);  // not yet implemented
-        //OutputStaticCreateMethods(commandInfo, sb); // moved to builder
         CreateInstance(sb, commandInfo);
 
         sb.CloseClass();
@@ -27,6 +25,16 @@ internal static class OutputArgsBuilder
                 $"internal class {commandInfo.Name}ArgsBuilder : ArgsBuilder<{commandInfo.RootName}>"]);
         sb.OpenCurly();
         //sb.AppendLine($$"""public ArgsBuilder<{{commandInfo.RootName}}>? ActiveArgsBuilder { get; set; }""");
+    }
+
+    internal static void StaticConstructor(CommandInfo commandInfo, StringBuilderWrapper sb)
+    {
+        sb.XmlSummary("This static builder supplies the CLI declaration and filling the DataValues and return instance.");
+        sb.XmlRemarks("The first type argument of the base is the Args type this builder creates, and the second is the root Args type. This means the two type arguments are the same for the root ArgsBuilder, but will differ for subcommand ArgsBuilders.");
+        sb.OpenMethod($"""static {commandInfo.Name}ArgsBuilder()""");
+        sb.AppendLine($"""ArgsBuilderCache<{commandInfo.RootName}>.AddArgsBuilder<{commandInfo.Name}> (new {commandInfo.Name}ArgsBuilder());""");
+        sb.CloseMethod();
+
     }
 
     private static void Initialize(StringBuilderWrapper sb, CommandInfo commandInfo)
@@ -57,7 +65,7 @@ internal static class OutputArgsBuilder
             GetSubCommandDeclaration(sb, subcommand);
         }
 
-        sb.AppendLine($$"""cmd.SetAction(p => { ActiveArgsBuilder = this; return {{commandInfo.Name.Length + commandInfo.BaseName?.Length}}; });""");
+        sb.AppendLine($$"""cmd.SetAction(p => { ArgsBuilderCache<{{commandInfo.RootName}}>.ActiveArgsBuilder = this; return {{commandInfo.Name.Length + commandInfo.BaseName?.Length}}; });""");
 
         sb.AppendLine("return cmd;");
 
@@ -152,6 +160,5 @@ internal static class OutputArgsBuilder
 
         sb.CloseMethod();
     }
-
 }
 

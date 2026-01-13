@@ -2,20 +2,27 @@
 
 namespace DragonFruit2;
 
-public class CliDataProvider<TArgs> : DataProvider
-            where TArgs : Args<TArgs>
+public class CliDataProvider<TRootArgs> : DataProvider
+            where TRootArgs : Args<TRootArgs>
 {
 
     public string[] InputArgs
     {
         get;
-        set
+        private set;
+
+    }
+
+    internal void SetInputArgs(string[] args)
+    {
         {
-            field = value;
+            InputArgs = args;
             ParseResult = RootCommand?.Parse(InputArgs);
+            ArgsBuilderCache<TRootArgs>.ActiveArgsBuilder = null;
             var x = ParseResult?.Invoke();
         }
     }
+
     public Command? RootCommand
     {
         get;
@@ -78,6 +85,5 @@ public class CliDataProvider<TArgs> : DataProvider
     {
         LookupByName[name] = symbol;
     }
-
 
 }

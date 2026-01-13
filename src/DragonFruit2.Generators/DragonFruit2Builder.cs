@@ -46,25 +46,40 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
 
     public override void OutputSource(SourceProductionContext context, CommandInfo commandInfo)
     {
-        //foreach (var commandInfo in items)
-        //{
-             context.AddSource(commandInfo.Name, GetSourceForCommandInfo(commandInfo));
-        //}
+        context.AddSource(commandInfo.Name, GetSourceForCommandInfo(commandInfo));
     }
 
+    public void OutputCliSource(SourceProductionContext context, IEnumerable<CommandInfo> commandInfos)
+    {
+        context.AddSource("Cli", GetSourceForCli(commandInfos));
+    }
+
+    private string GetSourceForCli(IEnumerable<CommandInfo> commandInfos)
+    {
+        return OutputCli.GetSource(commandInfos);
+    }
 
     internal static CommandInfo? GetRootCommandInfoFromInvocation(InvocationExpressionSyntax invocationSyntax, SemanticModel semanticModel)
     {
+        var invocationSymbol = semanticModel.GetSymbolInfo(invocationSyntax).Symbol as IMethodSymbol;
+        var invocationNamespace = invocationSymbol?.ContainingNamespace.Name;
+
         var rootArgsTypeArgSymbol = GetArgsTypeSymbol(invocationSyntax, semanticModel);
         if (rootArgsTypeArgSymbol is null)
             return null; // This occurs when the root arg type does not yet exist
-        var rootCommandInfo = CreateCommandInfo(rootArgsTypeArgSymbol, rootArgsTypeArgSymbol.Name, semanticModel);
+        var rootCommandInfo = CreateCommandInfo(rootArgsTypeArgSymbol,
+                                                rootArgsTypeArgSymbol.Name,
+                                                invocationNamespace,
+                                                semanticModel);
         return rootCommandInfo;
     }
 
-    private static CommandInfo CreateCommandInfo(INamedTypeSymbol typeSymbol, string? rootName, SemanticModel semanticModel)
+    private static CommandInfo CreateCommandInfo(INamedTypeSymbol typeSymbol,
+                                                 string? rootName,
+                                                 string? cliNamespaceName,
+                                                 SemanticModel semanticModel)
     {
-        var commandInfo = CommandInfoHelpers.CreateCommandInfo(typeSymbol, rootName);
+        var commandInfo = CommandInfoHelpers.CreateCommandInfo(typeSymbol, rootName, cliNamespaceName);
 
         // future: Check perf here (semanticModel is captured, etc)
         var props = typeSymbol.GetMembers()
@@ -84,7 +99,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         var derivedTypes = GetChildTypes(typeSymbol);
         foreach (var derivedType in derivedTypes)
         {
-            var childCommandInfo = CreateCommandInfo(derivedType, rootName, semanticModel);
+            var childCommandInfo = CreateCommandInfo(derivedType, rootName, cliNamespaceName,semanticModel);
             commandInfo.SubCommands.Add(childCommandInfo);
         }
 
@@ -127,7 +142,6 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
         if (genericName is null) return null;
 
         var typeArgSyntax = genericName.TypeArgumentList.Arguments[0];
-
         return semanticModel.GetSymbolInfo(typeArgSyntax).Symbol as INamedTypeSymbol;
     }
 
@@ -149,7 +163,7 @@ public class DragonFruit2Builder : GeneratorBuilder<CommandInfo>
 
     internal ImmutableArray<CommandInfo> BindParents(ImmutableArray<CommandInfo> commandInfos)
     {
-        foreach(var commandInfo in commandInfos)
+        foreach (var commandInfo in commandInfos)
         {
             BindParentsRecursive(commandInfo);
         }

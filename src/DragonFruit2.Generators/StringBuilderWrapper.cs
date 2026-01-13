@@ -69,13 +69,17 @@ internal class StringBuilderWrapper
     public void CloseClass()
        => CloseCurly();
 
-    public void OpenMethod(string line, string? baseCtor = null)
+    public void OpenMethod(string line, string? baseCtor = null, string? constraints = null)
     {
         AppendLine();
         AppendLine(line);
         if (baseCtor is not null)
         {
             AppendLine($"    : {baseCtor}");
+        }
+        if (constraints is not null)
+        {
+            AppendLine($"      where {constraints}");
         }
         OpenCurly();
     }
@@ -96,4 +100,18 @@ internal class StringBuilderWrapper
         OpenCurly();
     }
     internal void CloseForEach() => CloseCurly();
+
+    internal void XmlSummary(string summary)
+    {
+        AppendLine("/// <summary>");
+        AppendLine($"/// {summary}");
+        AppendLine("/// </summary>");
+    }
+
+    internal void XmlRemarks(string remarks)
+    {
+        AppendLine("/// <remarks>");
+        AppendLine($"/// {remarks}");
+        AppendLine("/// </remarks>");
+    }
 }

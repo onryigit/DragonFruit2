@@ -47,7 +47,7 @@ internal class OutputPartialArgs
                 $"""/// Auto-generated partial class for building CLI commands for <see cref="{commandInfo.Name}" />""",
                 $"""/// and creating a new {commandInfo.Name} instance from a <see cref="System.CommandLine.ParseResult" />.""",
                 "/// </summary>",
-                $"public partial class {commandInfo.Name} : {baseType}, IArgs<{commandInfo.RootName}>"]);
+                $"public partial class {commandInfo.Name} : {baseType}"]);
         sb.OpenCurly();
     }
 
@@ -91,8 +91,6 @@ internal class OutputPartialArgs
         static string CtorParameter(PropInfo p)
             => $"DataValue<{p.TypeName}> {p.Name.ToCamelCase()}DataValue";
     }
-
-
 
     internal static void ValidateMethod(StringBuilderWrapper sb, CommandInfo commandInfo)
     {

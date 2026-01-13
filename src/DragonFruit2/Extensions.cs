@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace DragonFruit2;
 
@@ -41,7 +42,7 @@ public static class CliExtensions
         /// </summary>
         public IEnumerable<PropertyInfo> GetPublicInstanceProperties()
         {
-            ArgumentNullException.ThrowIfNull(type);
+            _ =    type ?? throw new ArgumentNullException(nameof(type));
             return type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         }
     }

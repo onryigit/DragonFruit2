@@ -2,7 +2,7 @@
 
 namespace DragonFruit2;
 
-public abstract partial class Args<TArgs>
+public abstract class Args<TArgs>
     where TArgs : Args<TArgs>
 {
     public abstract IEnumerable<ValidationFailure> Validate();

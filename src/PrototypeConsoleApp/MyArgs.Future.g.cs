@@ -11,7 +11,7 @@ namespace SampleConsoleApp;
 /// <summary>
 /// 
 /// </summary>
-public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
+public partial class MyArgs : Args<MyArgs>
 {
     private List<Validator<int>>? ageValidators;
 
@@ -66,8 +66,21 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
         return new MyArgs.MyArgsBuilder();
     }
 
+    /// <summary>
+    /// This static builder supplies the CLI declaration and filling the DataValues and 
+    /// return instance.
+    /// </summary>
+    /// <remarks>
+    /// The first type argument of the base is the Args type this builder creates, and the second is the root Args type. 
+    /// This means the two type arguments are the same for the root ArgsBuilder, but will differ for subcommand ArgsBuilders.
+    /// </remarks>
     public class MyArgsBuilder : ArgsBuilder<MyArgs>
     {
+        static MyArgsBuilder()
+        {
+            ArgsBuilderCache<MyArgs>.AddArgsBuilder<MyArgs>(new MyArgsBuilder());
+        }
+
         public override Command Initialize(Builder<MyArgs> builder)
         {
             var cliDataProvider = GetCliDataProvider(builder);
@@ -98,7 +111,7 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
             cliDataProvider.AddNameLookup(nameof(MyArgs.Greeting), greetingOption);
             rootCommand.Add(greetingOption);
 
-            rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });
+            rootCommand.SetAction(p => { ArgsBuilderCache<MyArgs>.ActiveArgsBuilder = this; return 0; });
 
             return rootCommand;
         }

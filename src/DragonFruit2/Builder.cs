@@ -1,11 +1,11 @@
 ﻿namespace DragonFruit2;
 
-public class Builder<TArgs>
-    where TArgs : Args<TArgs>, IArgs<TArgs>
+public class Builder<TRootArgs>
+    where TRootArgs : Args<TRootArgs>
 {
     public Builder()
     {
-        AddDataProvider(new CliDataProvider<TArgs>());
+        AddDataProvider(new CliDataProvider<TRootArgs>());
     }
 
     public List<DataProvider> DataProviders { get; } = [];
@@ -35,17 +35,24 @@ public class Builder<TArgs>
     }
 
 
-    public DataValues<TArgs> ParseArgs(string[] args)
+    public DataValues<TRootArgs> ParseArgs(ArgsBuilder<TRootArgs> argsBuilder, string[] args)
     {
-        var dataBuilder  = TArgs.GetArgsBuilder(this);
-        var rootCommand = dataBuilder.Initialize(this);
+        //var argsBuilder = ArgsBuilderCache<TRootArgs>.GetArgsBuilder<TRootArgs>();
+        // The entire CLI tree is built from the TRootArgs
+        var rootCommand = argsBuilder.Initialize(this);
 
-        var cliDataProvider = DataProviders.OfType<CliDataProvider<TArgs>>().FirstOrDefault()
+        var cliDataProvider = DataProviders.OfType<CliDataProvider<TRootArgs>>().FirstOrDefault()
             ?? throw new InvalidOperationException("Internal error: CliDataProvider not found");
         cliDataProvider.RootCommand = rootCommand;
-        cliDataProvider.InputArgs = args;
-        var activeArgsBuilder = dataBuilder.GetActiveArgsBuilder;
-        var argsDataValues = activeArgsBuilder.Create(this);
+        // Once you set the InputArgs, the provider can start parsing
+        cliDataProvider.SetInputArgs(args);
+
+        var activeArgsBuilder = ArgsBuilderCache<TRootArgs>.GetActiveArgsBuilder();
+        if (activeArgsBuilder is null)
+        {
+            throw new InvalidOperationException("Handling failures in System.CommandLine is not yet implemented.");
+        }
+        var argsDataValues = activeArgsBuilder.CreateArgs(this);
         return argsDataValues;
     }
 }

@@ -6,7 +6,9 @@ namespace DragonFruit2.Generators;
 
 public static class CommandInfoHelpers
 {
-    public static CommandInfo CreateCommandInfo(INamedTypeSymbol typeSymbol, string rootName)
+    public static CommandInfo CreateCommandInfo(INamedTypeSymbol typeSymbol,
+                                                string? rootName,
+                                                string? cliNamespaceName)
     {
         string? baseTypeName = typeSymbol.Name == rootName ? null : typeSymbol.BaseType?.Name;
         return new()
@@ -15,6 +17,7 @@ public static class CommandInfoHelpers
             // TODO: Add description from attribute if present or XML docs
             Name = typeSymbol.Name,
             NamespaceName = typeSymbol.GetNamespace(),
+            CliNamespaceName= cliNamespaceName,
             BaseName = baseTypeName,
             RootName = rootName,
             IsStruct = typeSymbol.IsValueType,

@@ -12,7 +12,7 @@ namespace DragonFruit2.Generators
         {
             var rawCommandInfos = context.SyntaxProvider
                 .CreateSyntaxProvider(
-                    predicate: static (node, _) => builder.InitialFilter (node),
+                    predicate: static (node, _) => builder.InitialFilter(node),
                     transform: static (ctx, _) => builder.Transform(ctx))
                 .WithTrackingName("ParseArgsInvocations")
                 .Where(static s => s is not null)
@@ -30,10 +30,10 @@ namespace DragonFruit2.Generators
             context.RegisterSourceOutput(collectedAllCommandInfos,
                     static (spc, cmdInfos) =>
                     {
-                        spc.AddSource("DebuggingInfo", "//" + string.Join(", ", cmdInfos.Select(ci => ci.Name)));
+                        builder.OutputCliSource(spc, cmdInfos);
                     });
 
-            context.RegisterSourceOutput(allCommandInfos, 
+            context.RegisterSourceOutput(allCommandInfos,
                 static (spc, collected) =>
             {
                 builder.OutputSource(spc, collected);

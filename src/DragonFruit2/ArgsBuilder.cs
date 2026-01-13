@@ -3,43 +3,51 @@ using System.CommandLine;
 
 namespace DragonFruit2;
 
-public abstract class ArgsBuilder<TArgs>
-    where TArgs : Args<TArgs>, IArgs<TArgs>
+/// <summary>
+/// This type provides a common type to store ArgBuilders in the cache
+/// </summary>
+public abstract class ArgsBuilder
 {
-    private static ArgsBuilder<TArgs>? activeArgsBuilder;
 
-    public static ArgsBuilder<TArgs>? ActiveArgsBuilder
+}
+
+///// <summary>
+///// This type provides a common type to store ArgBuilders in the cache
+///// </summary>
+//public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
+//    where TRootArgs : Args<TRootArgs>
+//{
+
+//}
+
+/// <summary>
+/// 
+/// </summary>
+/// <typeparam name="TRootArgs"></typeparam>
+/// <typeparam name="TRootArgs"></typeparam>
+public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
+   where TRootArgs : Args<TRootArgs>
+{
+    protected static CliDataProvider<TRootArgs> GetCliDataProvider(Builder<TRootArgs> builder)
     {
-        get => activeArgsBuilder; 
-        set => activeArgsBuilder = value;
-    }
-
-    internal ArgsBuilder<TArgs>? GetActiveArgsBuilder => ActiveArgsBuilder;
-
-    protected CliDataProvider<TArgs> GetCliDataProvider(Builder<TArgs> builder)
-    {
-        var cliDataProvider = builder.DataProviders.OfType<CliDataProvider<TArgs>>().FirstOrDefault();
+        var cliDataProvider = builder.DataProviders.OfType<CliDataProvider<TRootArgs>>().FirstOrDefault();
         if (cliDataProvider is null)
         {
-            cliDataProvider = new CliDataProvider<TArgs>();
+            cliDataProvider = new CliDataProvider<TRootArgs>();
             builder.DataProviders.Add(cliDataProvider);
         }
         return cliDataProvider;
     }
-    public abstract Command Initialize(Builder<TArgs> builder);
 
-    public DataValues<TArgs> Create(Builder<TArgs> builder)
+    public abstract Command Initialize(Builder<TRootArgs> builder);
+
+    protected abstract TRootArgs CreateInstance(Builder<TRootArgs> builder);
+
+    protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(Builder<TRootArgs> builder);
+
+    public DataValues<TRootArgs> CreateArgs(Builder<TRootArgs> builder)
     {
-        // This seems the place to determine which subcommand to call
-        // * Args should know if they have subcommands, probably root knowing all the subcommands from the root
-        // * Assuming the root ArgsBuilder has a symbol/command switch or a dictionary of Func<TArgs>
-        // * Once we know the actual args subcommand class, and can instantiate get its argsbuilder, we 
-        //   can work up the inheritance hiearchy for any prpoerties that are shared
-        //
-        // Another way to solve this is to have Actions on the SCL.Commands that supply the ArgsBuilder
-        // * That might let us avoid the IArgs interface and support C# 7.1
-        // * The CliDataProvider is already a flawed class because it holds data (not reentrant) so we just extend that
-        var dataValues = new DataValues<TArgs>();
+        var dataValues = new DataValues<TRootArgs>();
         dataValues.ValidationFailures.AddRange(CheckRequiredValues(builder));
         if (dataValues.IsValid)
         {
@@ -54,9 +62,6 @@ public abstract class ArgsBuilder<TArgs>
 
         return dataValues;
     }
-
-    protected abstract TArgs CreateInstance(Builder<TArgs> builder);
-    protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(Builder<TArgs> builder);
 
     protected ValidationFailure? CheckRequiredValue<TValue>(string valueName, DataValue<TValue> dataValue)
     {

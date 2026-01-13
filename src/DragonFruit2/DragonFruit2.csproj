@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<LangVersion>14.0</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -10,7 +10,7 @@
 		<!--<IncludeBuildOutput>false</IncludeBuildOutput>-->
 
 		<PackageId>DragonFruit2</PackageId>
-		<Version>0.1.0-beta-003</Version>
+		<Version>0.1.0-beta-004</Version>
 		<Authors>Kathleen Dollard</Authors>
 		<Description>Source generator and analyzers for DragonFruit2 including required runtime dependencies.</Description>
 		<RepositoryUrl>https://github.com/your/repo</RepositoryUrl>
@@ -23,6 +23,10 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\DragonFruit2.Generators\DragonFruit2.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\DragonFruit2.Polyfills\DragonFruit2.Polyfills.csproj" PrivateAssets="All" IncludeAssets="runtime" />
 	</ItemGroup>
 
 	<ItemGroup>
