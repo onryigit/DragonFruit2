@@ -17,7 +17,7 @@ public class GreaterThanValidator<TValue> : Validator<TValue>
         if (value.CompareTo(CompareWithValue) <= 0)
         {
             var message = $"The value of {ValueName} must be greater than {CompareWithValue}, and {value} is not.";
-            return [new ValidationFailure<TValue>(Id, message, ValueName, value)];
+            return [new ValidationFailure<TValue>(Id, message, ValueName, DiagnosticSeverity.Error, value)];
         }
         return [];
     }

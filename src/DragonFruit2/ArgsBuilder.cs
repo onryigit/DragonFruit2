@@ -26,7 +26,7 @@ public abstract class ArgsBuilder
 /// <typeparam name="TRootArgs"></typeparam>
 /// <typeparam name="TRootArgs"></typeparam>
 public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
-   where TRootArgs : IArgs<TRootArgs>
+   where TRootArgs : class, IArgs<TRootArgs>
 {
     protected static CliDataProvider<TRootArgs> GetCliDataProvider(Builder<TRootArgs> builder)
     {
@@ -39,28 +39,31 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
         return cliDataProvider;
     }
 
-    public abstract Command Initialize(Builder<TRootArgs> builder);
+    public abstract Command InitializeCli(Builder<TRootArgs> builder);
 
     protected abstract TRootArgs CreateInstance(Builder<TRootArgs> builder);
 
     protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(Builder<TRootArgs> builder);
 
-    public Result<TRootArgs> CreateArgs(Builder<TRootArgs> builder)
+    public Result<TRootArgs> CreateArgs(Builder<TRootArgs> builder, IEnumerable<ValidationFailure>? existingFailures)
     {
-        var dataValues = new Result<TRootArgs>();
-        dataValues.ValidationFailures.AddRange(CheckRequiredValues(builder));
-        if (dataValues.IsValid)
+        existingFailures ??= Enumerable.Empty<ValidationFailure>();
+        var currentFailures = existingFailures.Concat(CheckRequiredValues(builder));
+
+        TRootArgs? args = null;
+        if (!currentFailures.Any(x=>x.Severity == DiagnosticSeverity.Error))
         {
-            var newArgs = CreateInstance(builder);
-            dataValues.Args = newArgs;
+            args = CreateInstance(builder);
         }
 
-        if (dataValues.Args is not null)
+        var result = new Result<TRootArgs>(currentFailures, args);
+
+        if (result.Args is not null)
         {
-            dataValues.ValidationFailures.AddRange(dataValues.Args.Validate());
+            result.AddFailures(result.Args.Validate());
         }
 
-        return dataValues;
+        return result;
     }
 
     protected ValidationFailure? CheckRequiredValue<TValue>(string valueName, DataValue<TValue> dataValue)
@@ -69,7 +72,7 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
         {
             var message = $"The value for {valueName} is required but was not provided.";
             var idString = $"{Validator.ToValidationIdString(ValidationId.Required)};";
-            return new ValidationFailure<TValue>(idString, message, valueName, dataValue.Value);
+            return new ValidationFailure<TValue>(idString, message, valueName, DiagnosticSeverity.Error, dataValue.Value);
         }
         return null;
     }

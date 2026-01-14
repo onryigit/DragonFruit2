@@ -120,7 +120,7 @@ public class CommandInfoBuildingTests
         var commandInfo = DragonFruit2Builder.GetRootCommandInfoFromInvocation(invocations.Single(), compilation.GetSemanticModel(programTree));
 
         Assert.NotNull(commandInfo);
-        Assert.Equal("public", commandInfo?.ArgsAccessibility);
+        Assert.Equal("protected internal", commandInfo?.ArgsAccessibility);
     }
     #endregion
 
@@ -215,7 +215,7 @@ public class CommandInfoBuildingTests
 
         Assert.NotNull(commandInfo);
         Assert.Single(commandInfo.Options);
-        Assert.Equal("given-name", commandInfo.Options.Single().CliName);
+        Assert.Equal("--given-name", commandInfo.Options.Single().CliName);
 
     }
 

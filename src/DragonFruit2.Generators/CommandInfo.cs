@@ -19,12 +19,19 @@ public record class CommandInfo
     {
         get => cliName switch
         {
-            null => $"{Name.ToKebabCase()}",
+            null => $"{ToCliName(Name)}",
             _ => cliName
         };
         init => cliName = value;
     }
 
+    private string ToCliName(string name)
+    {
+        name = Name.EndsWith("Args")
+               ? Name.Substring(0, Name.Length - 4)
+               : Name;
+        return name.ToKebabCase();
+    }
     public CommandInfo? ParentCommandInfo { get; set; } = null;
 
     public string? Description { get; init; } = null;

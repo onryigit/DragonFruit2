@@ -13,7 +13,7 @@ namespace MyNamespace
     /// Auto-generated partial class for building CLI commands for <see cref="EveningGreetingArgs" />
     /// and creating a new EveningGreetingArgs instance from a <see cref="System.CommandLine.ParseResult" />.
     /// </summary>
-    public partial class EveningGreetingArgs : MyArgs, IArgs<MyArgs>
+    public partial class EveningGreetingArgs : MyArgs
     {
 
 
@@ -21,14 +21,13 @@ namespace MyNamespace
         {
         }
         [SetsRequiredMembers()]
-
-        private EveningGreetingArgs(DataValue<int> ageDataValue)
-            : this()
+        protected EveningGreetingArgs(DataValue<int> ageDataValue, DataValue<string> nameDataValue)
+            : base(nameDataValue)
         {
             if (ageDataValue.IsSet) Age = ageDataValue.Value;
         }
 
-        public override IEnumerable<ValidationFailure> Validate()
+        public IEnumerable<ValidationFailure> Validate()
         {
             var failures = new List<ValidationFailure>();
             InitializeValidators();
@@ -50,12 +49,11 @@ namespace MyNamespace
         /// </summary>
         internal class EveningGreetingArgsArgsBuilder : ArgsBuilder<MyArgs>
         {
-            public ArgsBuilder<MyArgs>? ActiveArgsBuilder { get; set; }
 
-            public override void Initialize(Builder<MyArgs> builder)
+            public override Command Initialize(Builder<MyArgs> builder)
             {
                 var cliDataProvider = GetCliDataProvider(builder);
-                var rootCommand = new System.CommandLine.Command("MyArgs")
+                var cmd = new System.CommandLine.Command("evening-greeting")
                 {
                     Description = null,
                 };
@@ -63,12 +61,14 @@ namespace MyNamespace
                 var ageOption = new Option<int>("--age")
                 {
                     Description = null,
-                    Required = false
+                    Required = false,
+                    Recursive=true
                 };
                 cliDataProvider.AddNameLookup("Age", ageOption);
-                rootCommand.Add(ageOption);
-                rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });
-                cliDataProvider.RootCommand = rootCommand;
+                cmd.Add(ageOption);
+
+                cmd.SetAction(p => { ArgsBuilderCache<MyArgs>.ActiveArgsBuilder = this; return 25; });
+                return cmd;
             }
 
 
@@ -83,8 +83,9 @@ namespace MyNamespace
             protected override MyArgs CreateInstance(Builder<MyArgs> builder)
             {
                 var ageDataValue = builder.GetDataValue<int>("Age");
+                var nameDataValue = builder.GetDataValue<string>("Name");
 
-                var newArgs = new MyArgs(ageDataValue);
+                var newArgs = new EveningGreetingArgs(ageDataValue, nameDataValue);
                 return newArgs;
             }
         }

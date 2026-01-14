@@ -1,12 +1,11 @@
 ﻿using DragonFruit2.Validators;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.CommandLine.Invocation;
 
 namespace DragonFruit2;
 
 public class CliDataProvider<TRootArgs> : DataProvider
-            where TRootArgs : IArgs<TRootArgs>
+            where TRootArgs : class, IArgs<TRootArgs>
 {
 
     public string[] InputArgs
@@ -25,7 +24,7 @@ public class CliDataProvider<TRootArgs> : DataProvider
             var _ = ParseResult?.Invoke();
             var failures = ParseResult is not null && ParseResult.Errors.Any()
                             ? TransformErrors(ParseResult.Errors)
-                            : null;
+                            : Enumerable.Empty<ValidationFailure>();
 
             return (failures, ArgsBuilderCache<TRootArgs>.GetActiveArgsBuilder());
         }
@@ -38,7 +37,8 @@ public class CliDataProvider<TRootArgs> : DataProvider
         static ValidationFailure CreateValidationFailure(ParseError error)
             => new(ValidationId.SystemCommandLine.ToValidationIdString(),
                    error.Message,
-                   string.Empty);
+                   string.Empty,
+                   DiagnosticSeverity.Error);
     }
 
 
@@ -46,15 +46,6 @@ public class CliDataProvider<TRootArgs> : DataProvider
     {
         get;
         set;
-        //{
-        //    field = value;
-        //    field?.SetAction(parseResult =>
-        //    {
-        //        var parseResult = RootCommand?.Parse(InputArgs);
-        //        parseResult.Invoke();
-        //        return 0;
-        //    });
-        //}
     }
 
     public ParseResult? ParseResult

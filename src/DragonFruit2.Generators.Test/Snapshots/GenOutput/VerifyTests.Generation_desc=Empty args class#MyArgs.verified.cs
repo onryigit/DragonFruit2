@@ -11,16 +11,15 @@ using System.Diagnostics.CodeAnalysis;
 /// Auto-generated partial class for building CLI commands for <see cref="MyArgs" />
 /// and creating a new MyArgs instance from a <see cref="System.CommandLine.ParseResult" />.
 /// </summary>
-public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
+public partial class MyArgs : IArgs<MyArgs>
 {
 
     [SetsRequiredMembers()]
-
-    private MyArgs()
+    protected MyArgs()
     {
     }
 
-    public override IEnumerable<ValidationFailure> Validate()
+    public IEnumerable<ValidationFailure> Validate()
     {
         var failures = new List<ValidationFailure>();
         InitializeValidators();
@@ -42,18 +41,17 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
     /// </summary>
     internal class MyArgsArgsBuilder : ArgsBuilder<MyArgs>
     {
-        public ArgsBuilder<MyArgs>? ActiveArgsBuilder { get; set; }
 
-        public override void Initialize(Builder<MyArgs> builder)
+        public override Command Initialize(Builder<MyArgs> builder)
         {
             var cliDataProvider = GetCliDataProvider(builder);
-            var rootCommand = new System.CommandLine.Command("MyArgs")
+            var cmd = new System.CommandLine.RootCommand("my")
             {
                 Description = null,
             };
 
-            rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });
-            cliDataProvider.RootCommand = rootCommand;
+            cmd.SetAction(p => { ArgsBuilderCache<MyArgs>.ActiveArgsBuilder = this; return ; });
+            return cmd;
         }
 
 

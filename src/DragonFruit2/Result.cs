@@ -1,20 +1,34 @@
 ﻿using DragonFruit2.Validators;
+using System.Xml.Schema;
 
 namespace DragonFruit2;
 
 public class Result<TArgs>
     where TArgs : IArgs<TArgs>
 {
-    public static Result<TArgs> CreateFailure(IEnumerable<ValidationFailure> failures)
+    private readonly List<ValidationFailure> validationFailures = new();
+
+    public Result(IEnumerable<ValidationFailure> failures, TArgs? args)
     {
-        var result = new Result<TArgs>();
-        result.ValidationFailures.AddRange(failures);
-        return result;
+        validationFailures.AddRange(failures);
+        Args = args;
+        Status = (failures, args) switch
+        {
+            (not null, null) when failures.Any(x => x.Severity == DiagnosticSeverity.Error) => ResultStatus.Invalid,
+            (_, null) => ResultStatus.SclHandled,
+            (_, not null) => ResultStatus.ReadyToRun,
+        }; ;
     }
 
-    public readonly List<ValidationFailure> ValidationFailures = [];
-    public bool IsValid => !ValidationFailures.Any();
+    public IEnumerable<ValidationFailure> ValidationFailures => validationFailures;
     public TArgs? Args { get; set; }
+    public ResultStatus Status { get; internal set; }
+    public bool IsValid => Status == ResultStatus.ReadyToRun;
+
+    public void AddFailure(ValidationFailure failure)
+        => validationFailures.Add(failure);
+    public void AddFailures(IEnumerable<ValidationFailure> failures)
+     => validationFailures.AddRange(failures);
 
     public void ReportErrorsToConsole()
     {

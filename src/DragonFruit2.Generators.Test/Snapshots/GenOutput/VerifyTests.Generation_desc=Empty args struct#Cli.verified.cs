@@ -3,7 +3,6 @@
 # nullable enable
 
 using DragonFruit2;
-using MyNamespace;
 
 /// <summary>
 /// Auto-generated partial class that supplies the root ArgsBuilder.

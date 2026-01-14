@@ -13,17 +13,16 @@ namespace MyNamespace
     /// Auto-generated partial class for building CLI commands for <see cref="Bar" />
     /// and creating a new Bar instance from a <see cref="System.CommandLine.ParseResult" />.
     /// </summary>
-    public partial class Bar : EveningGreetingArgs, IArgs<MyArgs>
+    public partial class Bar : EveningGreetingArgs
     {
 
         [SetsRequiredMembers()]
-
-        private Bar(DataValue<int> ageDataValue, DataValue<string> nameDataValue)
+        protected Bar(DataValue<int> ageDataValue, DataValue<string> nameDataValue)
             : base(ageDataValue, nameDataValue)
         {
         }
 
-        public override IEnumerable<ValidationFailure> Validate()
+        public IEnumerable<ValidationFailure> Validate()
         {
             var failures = new List<ValidationFailure>();
             InitializeValidators();
@@ -45,18 +44,17 @@ namespace MyNamespace
         /// </summary>
         internal class BarArgsBuilder : ArgsBuilder<MyArgs>
         {
-            public ArgsBuilder<MyArgs>? ActiveArgsBuilder { get; set; }
 
-            public override void Initialize(Builder<MyArgs> builder)
+            public override Command Initialize(Builder<MyArgs> builder)
             {
                 var cliDataProvider = GetCliDataProvider(builder);
-                var rootCommand = new System.CommandLine.Command("MyArgs")
+                var cmd = new System.CommandLine.Command("bar")
                 {
                     Description = null,
                 };
 
-                rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });
-                cliDataProvider.RootCommand = rootCommand;
+                cmd.SetAction(p => { ArgsBuilderCache<MyArgs>.ActiveArgsBuilder = this; return 22; });
+                return cmd;
             }
 
 
@@ -73,7 +71,7 @@ namespace MyNamespace
                 var ageDataValue = builder.GetDataValue<int>("Age");
                 var nameDataValue = builder.GetDataValue<string>("Name");
 
-                var newArgs = new MyArgs(ageDataValue, nameDataValue);
+                var newArgs = new Bar(ageDataValue, nameDataValue);
                 return newArgs;
             }
         }

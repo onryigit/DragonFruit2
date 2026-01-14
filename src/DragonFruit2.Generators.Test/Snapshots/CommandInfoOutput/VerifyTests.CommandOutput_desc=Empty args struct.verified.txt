@@ -10,21 +10,15 @@ using System.Diagnostics.CodeAnalysis;
 /// Auto-generated partial class for building CLI commands for <see cref="MyArgs" />
 /// and creating a new MyArgs instance from a <see cref="System.CommandLine.ParseResult" />.
 /// </summary>
-public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
+public partial class MyArgs : IArgs<MyArgs>
 {
 
-
-    internal MyArgs()
-    {
-    }
     [SetsRequiredMembers()]
-
-    private MyArgs()
-        : this()
+    protected MyArgs()
     {
     }
 
-    public override IEnumerable<ValidationFailure> Validate()
+    public IEnumerable<ValidationFailure> Validate()
     {
         var failures = new List<ValidationFailure>();
         InitializeValidators();
@@ -37,31 +31,30 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
     {
     }
 
-    public static ArgsBuilder<MyArgs> GetArgsBuilder(Builder<MyArgs> builder)
+    public static ArgsBuilder<> GetArgsBuilder(Builder<> builder)
     {
         return new MyArgs.MyArgsArgsBuilder();
     }
 
     /// <summary>
     /// </summary>
-    internal class MyArgsArgsBuilder : ArgsBuilder<MyArgs>
+    internal class MyArgsArgsBuilder : ArgsBuilder<>
     {
-        public ArgsBuilder<MyArgs>? ActiveArgsBuilder { get; set; }
 
-        public override void Initialize(Builder<MyArgs> builder)
+        public override Command Initialize(Builder<> builder)
         {
             var cliDataProvider = GetCliDataProvider(builder);
-            var rootCommand = new System.CommandLine.Command("MyArgs")
+            var cmd = new System.CommandLine.RootCommand("my")
             {
                 Description = null,
             };
 
-            rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });
-            cliDataProvider.RootCommand = rootCommand;
+            cmd.SetAction(p => { ArgsBuilderCache<>.ActiveArgsBuilder = this; return ; });
+            return cmd;
         }
 
 
-        protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<MyArgs> builder)
+        protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<> builder)
         {
             var validationFailures = new List<ValidationFailure?>();
             return validationFailures
@@ -69,7 +62,7 @@ public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
            .Select(x => x!);
         }
 
-        protected override MyArgs CreateInstance(Builder<MyArgs> builder)
+        protected override  CreateInstance(Builder<> builder)
         {
 
             var newArgs = new MyArgs();

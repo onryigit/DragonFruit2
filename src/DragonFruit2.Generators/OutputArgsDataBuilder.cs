@@ -46,7 +46,7 @@ internal static class OutputArgsBuilder
 
         sb.AppendLine($"""var cliDataProvider = GetCliDataProvider(builder);""");
 
-        sb.AppendLine($"""var cmd = new System.CommandLine.Command("{commandInfo.CliName}")""");
+        sb.AppendLine($"""var cmd = new System.CommandLine.{(commandInfo.BaseName is null ? "Root" : "")}Command("{commandInfo.CliName}")""");
         sb.OpenCurly();
         sb.AppendLine($"""Description = {commandDescription},""");
         sb.CloseCurly(endStatement: true);

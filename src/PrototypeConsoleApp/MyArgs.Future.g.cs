@@ -81,7 +81,7 @@ public partial class MyArgs : IArgs<MyArgs>
             ArgsBuilderCache<MyArgs>.AddArgsBuilder<MyArgs>(new MyArgsBuilder());
         }
 
-        public override Command Initialize(Builder<MyArgs> builder)
+        public override Command InitializeCli(Builder<MyArgs> builder)
         {
             var cliDataProvider = GetCliDataProvider(builder);
 
@@ -136,16 +136,16 @@ public partial class MyArgs : IArgs<MyArgs>
         }
     }
 
-    public class MyArgsDataValues : Result<MyArgs>
-    {
-        public MyArgsDataValues(Builder<MyArgs> builder)
-        {
-            NameDataValue = builder.GetDataValue<string>("Name");
-            AgeDataValue = builder.GetDataValue<int>("Age");
-            GreetingDataValue = builder.GetDataValue<string>("Greeting");
-        }
-        public DataValue<string> NameDataValue { get; init; }
-        public DataValue<int> AgeDataValue { get; init; }
-        public DataValue<string> GreetingDataValue { get; init; }
-    }
+    //public class MyArgsDataValues : Result<MyArgs>
+    //{
+    //    public MyArgsDataValues(Builder<MyArgs> builder)
+    //    {
+    //        NameDataValue = builder.GetDataValue<string>("Name");
+    //        AgeDataValue = builder.GetDataValue<int>("Age");
+    //        GreetingDataValue = builder.GetDataValue<string>("Greeting");
+    //    }
+    //    public DataValue<string> NameDataValue { get; init; }
+    //    public DataValue<int> AgeDataValue { get; init; }
+    //    public DataValue<string> GreetingDataValue { get; init; }
+    //}
 }

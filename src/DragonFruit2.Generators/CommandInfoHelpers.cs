@@ -12,11 +12,9 @@ public static class CommandInfoHelpers
                                                 string? cliNamespaceName)
     {
         string? baseTypeName = typeSymbol.Name == rootName ? null : typeSymbol.BaseType?.Name;
-        var format = new SymbolDisplayFormat( );
 
         return new()
         {
-
             // TODO: Add description from attribute if present or XML docs
             Name = typeSymbol.Name,
             NamespaceName = typeSymbol.GetNamespace(),
@@ -112,9 +110,21 @@ public static class CommandInfoHelpers
 
         var info = new ValidatorInfo
         {
-            Name = attrClass.Name.Replace("Attribute", ""),
+
+            Name = AttributeClassName(attrClass),
             FullTypeName = attrClass.ToDisplayString()
         };
+
+        static string AttributeClassName(INamedTypeSymbol attrClass)
+        {
+            var attributeName = attrClass.Name;
+            var attribute = "Attribute";
+            if (attributeName.EndsWith(attribute))
+            {
+                attributeName = attributeName.Substring(0, attributeName.Length - attribute.Length);
+            }
+            return attributeName;
+        }
 
         // Convert TypedConstant to readable string representation
         static string TypedConstantToString(TypedConstant tc)

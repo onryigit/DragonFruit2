@@ -13,7 +13,7 @@
 /// </remarks>
 /// <typeparam name="TRootArgs"></typeparam>
 public static class ArgsBuilderCache<TRootArgs>
-    where TRootArgs : IArgs<TRootArgs>
+    where TRootArgs : class, IArgs<TRootArgs>
 {
     private static Dictionary<Type, ArgsBuilder<TRootArgs>> availableArgsBuilders = new();
     private static ArgsBuilder<TRootArgs>? activeArgsBuilder;
@@ -40,7 +40,7 @@ public static class ArgsBuilderCache<TRootArgs>
     }
 
     public static ArgsBuilder<TArgs> GetArgsBuilder<TArgs>()
-        where TArgs : IArgs<TArgs>
+        where TArgs : class, IArgs<TArgs>
     {
         return (ArgsBuilder<TArgs>)GetArgsBuilder(typeof(TArgs));
     }

@@ -1,12 +1,14 @@
 ﻿{
   Name: MyArgs,
   NamespaceName: MyNamespace,
+  ArgsAccessibility: public,
   RootName: MyArgs,
+  CliName: my,
   IsStruct: false,
   Options: [
     {
       Name: Name,
-      CliName: name,
+      CliName: --name,
       TypeName: string,
       IsValueType: false,
       HasRequiredModifier: true,
@@ -19,7 +21,7 @@
   PropInfos: [
     {
       Name: Name,
-      CliName: name,
+      CliName: --name,
       TypeName: string,
       IsValueType: false,
       HasRequiredModifier: true,
@@ -29,25 +31,45 @@
       IsRequiredForCli: true
     }
   ],
+  SelfAndAncestorPropInfos: [
+    {
+      Name: Name,
+      CliName: --name,
+      TypeName: string,
+      IsValueType: false,
+      HasRequiredModifier: true,
+      HasArgumentAttribute: false,
+      IsArgument: false,
+      HasInitializer: false,
+      IsRequiredForCli: true
+    }
+  ],
+  AncestorPropInfos: [],
   SubCommands: [
     {
       Name: MorningGreetingArgs,
       NamespaceName: MyNamespace,
+      ArgsAccessibility: public,
       BaseName: MyArgs,
       RootName: MyArgs,
+      CliName: morning-greeting,
       IsStruct: false,
-      PropInfos: []
+      PropInfos: [],
+      SelfAndAncestorPropInfos: [],
+      AncestorPropInfos: []
     },
     {
       Name: EveningGreetingArgs,
       NamespaceName: MyNamespace,
+      ArgsAccessibility: public,
       BaseName: MyArgs,
       RootName: MyArgs,
+      CliName: evening-greeting,
       IsStruct: false,
       Options: [
         {
           Name: Age,
-          CliName: age,
+          CliName: --age,
           TypeName: int,
           IsValueType: true,
           NullableAnnotation: NotAnnotated,
@@ -62,7 +84,7 @@
       PropInfos: [
         {
           Name: Age,
-          CliName: age,
+          CliName: --age,
           TypeName: int,
           IsValueType: true,
           NullableAnnotation: NotAnnotated,
@@ -74,14 +96,34 @@
           IsRequiredForCli: false
         }
       ],
+      SelfAndAncestorPropInfos: [
+        {
+          Name: Age,
+          CliName: --age,
+          TypeName: int,
+          IsValueType: true,
+          NullableAnnotation: NotAnnotated,
+          HasRequiredModifier: false,
+          HasArgumentAttribute: false,
+          IsArgument: false,
+          HasInitializer: true,
+          InitializerText: 1,
+          IsRequiredForCli: false
+        }
+      ],
+      AncestorPropInfos: [],
       SubCommands: [
         {
           Name: Bar,
           NamespaceName: MyNamespace,
+          ArgsAccessibility: public,
           BaseName: EveningGreetingArgs,
           RootName: MyArgs,
+          CliName: bar,
           IsStruct: false,
-          PropInfos: []
+          PropInfos: [],
+          SelfAndAncestorPropInfos: [],
+          AncestorPropInfos: []
         }
       ]
     }

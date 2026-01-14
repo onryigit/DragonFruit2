@@ -3,7 +3,7 @@
 namespace DragonFruit2;
 
 public class Builder<TRootArgs>
-    where TRootArgs : IArgs<TRootArgs>
+    where TRootArgs : class, IArgs<TRootArgs>
 {
     public Builder()
     {
@@ -41,7 +41,7 @@ public class Builder<TRootArgs>
     {
         //var argsBuilder = ArgsBuilderCache<TRootArgs>.GetArgsBuilder<TRootArgs>();
         // The entire CLI tree is built from the TRootArgs
-        var rootCommand = argsBuilder.Initialize(this);
+        var rootCommand = argsBuilder.InitializeCli(this);
 
         var cliDataProvider = DataProviders.OfType<CliDataProvider<TRootArgs>>().FirstOrDefault()
             ?? throw new InvalidOperationException("Internal error: CliDataProvider not found");
@@ -49,11 +49,8 @@ public class Builder<TRootArgs>
         // Once you set the InputArgs, the provider can start parsing
         var (failures, activeArgsBuilder) = cliDataProvider.GetActiveArgsBuilder(args);
 
-        return (failures, activeArgsBuilder) switch
-        {
-            (not null, null) when failures.Any() => Result<TRootArgs>.CreateFailure(failures),
-            (_, null) => Result<TRootArgs>.CreateFailure([new ValidationFailure(ValidationId.UnknownParsingFailure.ToValidationIdString(), "Unknown Failure", "")]),
-            _ => activeArgsBuilder.CreateArgs(this)
-        };
+        return activeArgsBuilder is null
+                    ? new Result<TRootArgs>(failures, null)
+                    : activeArgsBuilder.CreateArgs(this, failures);
     }
 }

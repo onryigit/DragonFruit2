@@ -14,6 +14,8 @@ There are three stages of validation and stages are not executed if there is any
 * Property validation
 * Custom/type wide validation
 
+Required values must be a separate step because we cannot create the instance until `required` values are supplied in a `nullable enable` context. Custom/type wide valid avoids a sea of errors obscuring the causal ones.
+
 ## Attributes
 
-Many validators will have an attribute to allow users to easily define them. At present, the name of the attribute class must be exactly _ValidatorTypeName_Attribute
+Many validators will have an attribute to allow users to easily define them. At present, the name of the attribute class must be exactly _ValidatorName_Attribute and the validator type must be exactly _ValidatorName_Validator.

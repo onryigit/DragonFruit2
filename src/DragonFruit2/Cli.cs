@@ -15,7 +15,7 @@ public static class Cli
     /// <param name="args">Optionaly pass the commandline args</param>
     /// <returns>A Result instance containing the hydrated args or error messages.</returns>
     public static Result<TRootArgs> ParseArgs<TRootArgs>(string[]? args = null)
-        where TRootArgs : IArgs<TRootArgs>
+        where TRootArgs : class, IArgs<TRootArgs>
     {
         throw new InvalidOperationException("This method is a stub for source generation. If you see this error, there is probably a problem with source generation.");
         //args ??= Environment.GetCommandLineArgs();
@@ -33,14 +33,11 @@ public static class Cli
     /// <param name="args">Optionaly pass the commandline args</param>
     /// <returns></returns>
     public static Result<TRootArgs> ParseArgs<TRootArgs>(ArgsBuilder<TRootArgs> rootArgsBuilder, string[]? args = null)
-        where TRootArgs : IArgs<TRootArgs>
+        where TRootArgs : class, IArgs<TRootArgs>
     {
+        // The first item is the exe/dll name
         args ??= Environment.GetCommandLineArgs().Skip(1).ToArray();
 
-        var argsDataValues = new Builder<TRootArgs>().ParseArgs(rootArgsBuilder, args);
-
-
-        return argsDataValues;
-
+        return new Builder<TRootArgs>().ParseArgs(rootArgsBuilder, args);
     }
 }

@@ -13,7 +13,7 @@ namespace MyNamespace
     /// Auto-generated partial class for building CLI commands for <see cref="MyArgs" />
     /// and creating a new MyArgs instance from a <see cref="System.CommandLine.ParseResult" />.
     /// </summary>
-    public partial class MyArgs : Args<MyArgs>, IArgs<MyArgs>
+    public partial class MyArgs : IArgs<MyArgs>
     {
 
 
@@ -21,14 +21,13 @@ namespace MyNamespace
         {
         }
         [SetsRequiredMembers()]
-
-        private MyArgs(DataValue<string> nameDataValue)
+        protected MyArgs(DataValue<string> nameDataValue)
             : this()
         {
             if (nameDataValue.IsSet) Name = nameDataValue.Value;
         }
 
-        public override IEnumerable<ValidationFailure> Validate()
+        public IEnumerable<ValidationFailure> Validate()
         {
             var failures = new List<ValidationFailure>();
             InitializeValidators();
@@ -50,12 +49,11 @@ namespace MyNamespace
         /// </summary>
         internal class MyArgsArgsBuilder : ArgsBuilder<MyArgs>
         {
-            public ArgsBuilder<MyArgs>? ActiveArgsBuilder { get; set; }
 
-            public override void Initialize(Builder<MyArgs> builder)
+            public override Command Initialize(Builder<MyArgs> builder)
             {
                 var cliDataProvider = GetCliDataProvider(builder);
-                var rootCommand = new System.CommandLine.Command("MyArgs")
+                var cmd = new System.CommandLine.RootCommand("my")
                 {
                     Description = null,
                 };
@@ -63,18 +61,20 @@ namespace MyNamespace
                 var nameOption = new Option<string>("--name")
                 {
                     Description = null,
-                    Required = true
+                    Required = true,
+                    Recursive=true
                 };
                 cliDataProvider.AddNameLookup("Name", nameOption);
-                rootCommand.Add(nameOption);
-                morningGreetingArgsCommand = new System.CommandLine.Command("MyArgs");
-                morningGreetingArgsArgsBuilder.Initialize();
-                rootCommand.Add(morningGreetingArgs);
-                eveningGreetingArgsCommand = new System.CommandLine.Command("MyArgs");
-                eveningGreetingArgsArgsBuilder.Initialize();
-                rootCommand.Add(eveningGreetingArgs);
-                rootCommand.SetAction(p => { ActiveArgsBuilder = this; return 0; });
-                cliDataProvider.RootCommand = rootCommand;
+                cmd.Add(nameOption);
+
+                var morningGreetingArgsCommand = MorningGreetingArgs.GetArgsBuilder(builder).Initialize(builder);
+                cmd.Add(morningGreetingArgsCommand);
+
+                var eveningGreetingArgsCommand = EveningGreetingArgs.GetArgsBuilder(builder).Initialize(builder);
+                cmd.Add(eveningGreetingArgsCommand);
+
+                cmd.SetAction(p => { ArgsBuilderCache<MyArgs>.ActiveArgsBuilder = this; return ; });
+                return cmd;
             }
 
 
