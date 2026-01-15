@@ -20,6 +20,7 @@ public record class PropInfo
         init => cliName = value;
     }
     public required string TypeName { get; init; }
+    public required string ContainingTypeName { get; init; }
     public bool IsValueType { get; init; }
     public NullableAnnotation NullableAnnotation { get; init; }
     public bool HasRequiredModifier { get; init; }

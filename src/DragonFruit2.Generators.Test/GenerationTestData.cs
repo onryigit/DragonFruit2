@@ -259,6 +259,7 @@ public class CommandInfoTheoryData : TheoryData<string, string, string, CommandI
             {
                 Name = "Name",
                 TypeName = "string",
+                ContainingTypeName = "MyArgs",
                 HasRequiredModifier = true,
             });
             subCommandsCommandInfo.SubCommands.Add(
@@ -278,6 +279,7 @@ public class CommandInfoTheoryData : TheoryData<string, string, string, CommandI
             {
                 Name = "Age",
                 TypeName = "int",
+                ContainingTypeName = "MyArgs",
                 HasRequiredModifier = false,
             });
             subCommandsCommandInfo.SubCommands.Add(subCommandsEveningCommandInfo);
@@ -297,6 +299,7 @@ public class CommandInfoTheoryData : TheoryData<string, string, string, CommandI
             {
                 Name = "Name",
                 TypeName = "string",
+                ContainingTypeName = "MyArgs",
                 HasRequiredModifier = true,
             });
             deepSubCommandInfo.SubCommands.Add(
@@ -316,6 +319,7 @@ public class CommandInfoTheoryData : TheoryData<string, string, string, CommandI
             {
                 Name = "Age",
                 TypeName = "int",
+                ContainingTypeName = "MyArgs",
                 HasRequiredModifier = false,
             });
             var deeperSubCommandsEveningCommandInfo = new CommandInfo()

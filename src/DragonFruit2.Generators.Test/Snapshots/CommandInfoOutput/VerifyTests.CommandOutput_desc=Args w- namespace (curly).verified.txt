@@ -33,6 +33,8 @@ namespace MyNamespace
         {
         }
 
+        static partial void RegisterCustomDefaults(Builder<> builder, DefaultDataProvider<> defaultDataProvider);
+
         public static ArgsBuilder<> GetArgsBuilder(Builder<> builder)
         {
             return new MyArgs.MyArgsArgsBuilder();

@@ -42,7 +42,7 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
         var currentFailures = existingFailures.Concat(CheckRequiredValues(builder));
 
         TRootArgs? args = null;
-        if (!currentFailures.Any(x=>x.Severity == DiagnosticSeverity.Error))
+        if (!currentFailures.Any(x => x.Severity == DiagnosticSeverity.Error))
         {
             args = CreateInstance(builder);
         }
@@ -57,9 +57,9 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
         return result;
     }
 
-    protected ValidationFailure? CheckRequiredValue<TValue>(string valueName, DataValue<TValue> dataValue)
+    protected ValidationFailure? CheckRequiredValue<TValue>(string valueName, DataValue<TValue>? dataValue)
     {
-        if (!dataValue.IsSet || dataValue.Value is null)
+        if (dataValue is null || !dataValue.IsSet)
         {
             var message = $"The value for {valueName} is required but was not provided.";
             var idString = $"{Validator.ToValidationIdString(ValidationId.Required)};";

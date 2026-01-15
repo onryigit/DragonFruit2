@@ -37,7 +37,6 @@ public class CliDataProvider<TRootArgs> : DataProvider, IActiveArgsBuilderProvid
                    DiagnosticSeverity.Error);
     }
 
-
     public Command? RootCommand
     {
         get;
@@ -50,46 +49,66 @@ public class CliDataProvider<TRootArgs> : DataProvider, IActiveArgsBuilderProvid
         private set;
     }
 
-    public Dictionary<string, Symbol> LookupByName { get; set; } = [];
+    public Dictionary<(Type argsType, string propertyName), Symbol> LookupSymbol { get; set; } = [];
 
-    public override bool TryGetValue<TValue>(string key, object[] alternateKeys, out DataValue<TValue> trialValue)
+    public override bool TryGetValue<TValue>((Type argsType, string propertyName) key,out DataValue<TValue>? dataValue)
     {
         if (RootCommand is null) throw new ArgumentNullException(nameof(RootCommand));
+        if (InputArgs is null) throw new ArgumentNullException(nameof(InputArgs));
         ParseResult ??= RootCommand.Parse(InputArgs);
 
-        var symbol = LookupByName[key];
+        var symbol = LookupSymbol[key];
         if (symbol is not null)
         {
             var symbolResult = ParseResult.GetResult(symbol);
-            if (symbolResult is not null && symbolResult.Tokens.Count > 0)
+            if (symbolResult is not null)
             {
-                // Value was provided. 
-                // TODO: Test bool flags
-                trialValue = GetValue(ParseResult, symbol);
-                return true;
+                // Symbol was found, value may or may not have been provided
+                dataValue = GetValue(ParseResult, symbol, this);
+                return dataValue is not null;
             }
         }
-        trialValue = DataValue<TValue>.CreateEmpty();
+        dataValue = null;
         return false;
 
-        DataValue<TValue> GetValue(ParseResult parseResult, Symbol symbol)
+        static DataValue<TValue>? GetValue(ParseResult parseResult, Symbol symbol, DataProvider dataProvider)
         {
-            TValue? value = symbol switch
-            {
-                Argument argument => parseResult.GetValue<TValue>(argument.Name),
-                Option option => parseResult.GetValue<TValue>(option.Name),
-                _ => throw new InvalidOperationException("Unsupported symbol type")
-            };
+            var symbolResult = parseResult.GetResult(symbol);
+            if (symbolResult is null) return null;
 
-            return value is null
-                ? DataValue<TValue>.CreateEmpty()
-                : DataValue<TValue>.Create(value!, this);
+            var resultFound = false;
+            TValue? value = default;
+
+            if (symbolResult.Tokens.Any())
+            {
+                // Except for Boolean switches, do not use default values, but only those specified via tokens
+                resultFound = true;
+                value = symbol switch
+                {
+                    Argument argument => parseResult.GetValue<TValue>(argument.Name),
+                    Option option => parseResult.GetValue<TValue>(option.Name),
+                    _ => throw new InvalidOperationException("Unsupported symbol type")
+                };
+            }
+            else if (symbolResult is OptionResult optionResult && optionResult.Option.ValueType == typeof(bool))
+            {
+                // If the user specified the option, use the default value, which is provided by GetValue
+                if (optionResult.IdentifierTokenCount > 0)
+                {
+                    resultFound = true;
+                    value = parseResult.GetValue<TValue>(optionResult.Option.Name);
+                }
+            }
+
+            return resultFound
+                ? DataValue<TValue>.Create(value, dataProvider)
+                : null;
         }
     }
 
-    public void AddNameLookup(string name, Symbol symbol)
+    public void AddNameLookup((Type argsType, string propertyName) key, Symbol symbol)
     {
-        LookupByName[name] = symbol;
+        LookupSymbol[key] = symbol;
     }
 
 }

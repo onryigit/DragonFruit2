@@ -23,7 +23,7 @@ namespace MyNamespace
         protected MyArgs(DataValue<string> nameDataValue)
             : this()
         {
-            if (nameDataValue.IsSet) Name = nameDataValue.Value;
+            if (nameDataValue is not null && nameDataValue.IsSet) Name = nameDataValue.Value;
         }
 
         public IEnumerable<ValidationFailure> Validate()
@@ -38,6 +38,8 @@ namespace MyNamespace
         private void InitializeValidators()
         {
         }
+
+        static partial void RegisterCustomDefaults(Builder<> builder, DefaultDataProvider<> defaultDataProvider);
 
         public static ArgsBuilder<> GetArgsBuilder(Builder<> builder)
         {
@@ -67,7 +69,7 @@ namespace MyNamespace
                     Required = true,
                     Recursive=true
                 };
-                cliDataProvider.AddNameLookup("Name", nameOption);
+                cliDataProvider.AddNameLookup((typeof(MyArgs), nameof(Name)), nameOption);
                 cmd.Add(nameOption);
 
                 var morningGreetingArgsCommand = MorningGreetingArgs.GetArgsBuilder(builder).InitializeCli(builder, cliDataProvider);
@@ -84,7 +86,7 @@ namespace MyNamespace
             protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<> builder)
             {
                 var validationFailures = new List<ValidationFailure?>();
-                validationFailures.Add(CheckRequiredValue<string>("Name", builder.GetDataValue<string>("Name")));
+                validationFailures.Add(CheckRequiredValue<string>("Name", builder.GetDataValue<string>((typeof(MyArgs), "Name"))));
                 return validationFailures
            .Where(x => x is not null)
            .Select(x => x!);
@@ -92,7 +94,7 @@ namespace MyNamespace
 
             protected override  CreateInstance(Builder<> builder)
             {
-                var nameDataValue = builder.GetDataValue<string>("Name");
+                var nameDataValue = builder.GetDataValue<string>((typeof(MyArgs), nameof(Name)));
 
                 var newArgs = new MyArgs(nameDataValue);
                 return newArgs;

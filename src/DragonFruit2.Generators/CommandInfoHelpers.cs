@@ -41,6 +41,7 @@ public static class CommandInfoHelpers
         {
             Name = propSymbol.Name,
             TypeName = propSymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            ContainingTypeName = propSymbol.ContainingType.Name,
             IsValueType = propSymbol.Type.IsValueType,
             NullableAnnotation = propSymbol.NullableAnnotation,
             HasRequiredModifier = propSymbol.IsRequired,

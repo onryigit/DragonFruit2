@@ -1,4 +1,5 @@
-﻿using DragonFruit2.Validators;
+﻿using DragonFruit2;
+using DragonFruit2.Validators;
 
 namespace SampleConsoleApp;
 
@@ -22,4 +23,9 @@ public partial class MyArgs
     /// "Greeting message"
     /// </summary>
     public string Greeting { get; set; } = string.Empty;
+
+    static partial void RegisterCustomDefaults(Builder<MyArgs> builder, DefaultDataProvider<MyArgs> defaultDataProvider)
+    {
+        defaultDataProvider.RegisterDefault((typeof(MyArgs), nameof(Greeting)), "Hi there!");
+    }
 }

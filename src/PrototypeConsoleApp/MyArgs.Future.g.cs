@@ -5,6 +5,7 @@ using DragonFruit2;
 using DragonFruit2.Validators;
 using System.CommandLine;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 
 namespace SampleConsoleApp;
 
@@ -61,6 +62,8 @@ public partial class MyArgs : IArgs<MyArgs>
         // Other properties do not have validation, so their validators remain null.
     }
 
+    static partial void RegisterCustomDefaults(Builder<MyArgs> builder, DefaultDataProvider<MyArgs> defaultDataProvider);
+
     public static ArgsBuilder<MyArgs> GetArgsBuilder(Builder<MyArgs> builder)
     {
         return new MyArgs.MyArgsBuilder();
@@ -85,7 +88,18 @@ public partial class MyArgs : IArgs<MyArgs>
         {
             // Generate for each data provider
             InitializeCli(builder, builder.DataProviders.OfType<CliDataProvider<MyArgs>>().FirstOrDefault());
+            InitializeDefaults(builder, builder.DataProviders.OfType<DefaultDataProvider<MyArgs>>().FirstOrDefault());
         }
+
+        private void InitializeDefaults(Builder<MyArgs> builder, DefaultDataProvider<MyArgs>? defaultDataProvider)
+        {
+            if (defaultDataProvider is null) return;
+
+            // RegisterDefaults for attribute values and initialization
+
+            RegisterCustomDefaults(builder, defaultDataProvider);
+        }
+
 
         public override Command InitializeCli(Builder<MyArgs> builder, CliDataProvider<MyArgs>? cliDataProvider)
         {
@@ -100,21 +114,21 @@ public partial class MyArgs : IArgs<MyArgs>
                 Description = "Your name",
                 Required = true
             };
-            cliDataProvider.AddNameLookup(nameof(MyArgs.Name), nameOption);
+            cliDataProvider.AddNameLookup((typeof(MyArgs), nameof(MyArgs.Name)), nameOption);
             rootCommand.Add(nameOption);
 
             var ageOption = new Option<System.Int32>("--age")
             {
                 Description = "Your Age"
             };
-            cliDataProvider.AddNameLookup(nameof(MyArgs.Age), ageOption);
+            cliDataProvider.AddNameLookup((typeof(MyArgs), nameof(MyArgs.Age)), ageOption);
             rootCommand.Add(ageOption);
 
             var greetingOption = new Option<System.String>("--greeting")
             {
                 Description = "Greeting message"
             };
-            cliDataProvider.AddNameLookup(nameof(MyArgs.Greeting), greetingOption);
+            cliDataProvider.AddNameLookup((typeof(MyArgs), nameof(MyArgs.Greeting)), greetingOption);
             rootCommand.Add(greetingOption);
 
             rootCommand.SetAction(p => { ArgsBuilderCache<MyArgs>.ActiveArgsBuilder = this; return 0; });
@@ -127,7 +141,7 @@ public partial class MyArgs : IArgs<MyArgs>
         protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<MyArgs> builder)
         {
             var validationFailures = new List<ValidationFailure?>();
-            validationFailures.Add(CheckRequiredValue<string>("Name", builder.GetDataValue<string>("Name")));
+            validationFailures.Add(CheckRequiredValue<string>("Name", builder.GetDataValue<string>((typeof(MyArgs), "Name"))));
             return validationFailures
                     .Where(x => x is not null)
                     .Select(x => x!);
@@ -135,14 +149,16 @@ public partial class MyArgs : IArgs<MyArgs>
 
         protected override MyArgs CreateInstance(Builder<MyArgs> builder)
         {
-            var nameDataValue = builder.GetDataValue<string>("Name");
-            var ageDataValue = builder.GetDataValue<int>("Age");
-            var greetingDataValue = builder.GetDataValue<string>("Greeting");
+            var nameDataValue = builder.GetDataValue<string>( (typeof(MyArgs), "Name"));
+            var ageDataValue = builder.GetDataValue<int>((typeof(MyArgs), "Age"));
+            var greetingDataValue = builder.GetDataValue<string>((typeof(MyArgs), "Greeting"));
 
             var newArgs = new MyArgs(nameDataValue, ageDataValue, greetingDataValue);
             return newArgs;
         }
     }
+
+
 
     //public class MyArgsDataValues : Result<MyArgs>
     //{

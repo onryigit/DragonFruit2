@@ -9,6 +9,7 @@ public class Builder<TRootArgs>
     {
         CommandLineArguments = commandLineArguments;
         AddDataProvider(new CliDataProvider<TRootArgs>(this));
+        AddDataProvider(new DefaultDataProvider<TRootArgs>(this));
         Configuration = configuration;
     }
 
@@ -29,16 +30,16 @@ public class Builder<TRootArgs>
         }
     }
 
-    public DataValue<T> GetDataValue<T>(string key, params object[] alternateKeys)
+    public DataValue<T>? GetDataValue<T>((Type argsType, string propertyName) key)
     {
         foreach (var dataProvider in DataProviders)
         {
-            if (dataProvider.TryGetValue<T>(key, alternateKeys, out var dataValue))
+            if (dataProvider.TryGetValue<T>(key,  out var dataValue))
             {
                 return dataValue;
             }
         }
-        return DataValue<T>.CreateEmpty();
+        return null;
     }
 
     public Result<TRootArgs> ParseArgs(ArgsBuilder<TRootArgs> argsBuilder)

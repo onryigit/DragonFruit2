@@ -1,20 +1,17 @@
 ﻿namespace DragonFruit2;
 
-public readonly record struct DataValue<T>
+public record class DataValue<T> : IDataValue
 {
-    public static DataValue<T> Create(T value, DataProvider setBy)
+    public static DataValue<T> Create(T? value, DataProvider setBy)
         => new(value, setBy);
 
-    public static DataValue<T> CreateEmpty()
-        => new();
-
-    private DataValue(T value, DataProvider setBy)
+    private DataValue(T? value, DataProvider setBy)
     {
         Value = value;
         SetBy = setBy;
     }
 
-    public T Value { get; }
+    public T? Value { get; }
 
     public DataProvider SetBy { get; }
 

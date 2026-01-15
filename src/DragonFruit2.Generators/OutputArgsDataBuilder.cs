@@ -41,9 +41,11 @@ internal static class OutputArgsBuilder
     {
         sb.OpenMethod($"""public override void Initialize(Builder<{commandInfo.RootName}> builder)""");
         sb.AppendLine($"InitializeCli(builder, builder.DataProviders.OfType<CliDataProvider<{commandInfo.RootName}>>().FirstOrDefault());");
+        sb.AppendLine($"InitializeDefaults(builder, builder.DataProviders.OfType<DefaultDataProvider<{commandInfo.RootName}>>().FirstOrDefault());");
         sb.CloseMethod();
 
         InitializeCli(sb, commandInfo);
+        InitializeDefaults(sb, commandInfo);
     }
 
     private static void InitializeCli(StringBuilderWrapper sb, CommandInfo commandInfo)
@@ -59,13 +61,13 @@ internal static class OutputArgsBuilder
         sb.CloseCurly(endStatement: true);
 
         sb.AppendLine();
-        foreach (var option in commandInfo.Options)
+        foreach (var optionInfo in commandInfo.Options)
         {
-            GetOptionDeclaration(sb, option);
+            GetOptionDeclaration(sb, commandInfo, optionInfo);
         }
-        foreach (var argument in commandInfo.Arguments)
+        foreach (var argumentInfo in commandInfo.Arguments)
         {
-            GetArgumentDeclaration(sb, argument);
+            GetArgumentDeclaration(sb, commandInfo,argumentInfo);
         }
         foreach (var subcommand in commandInfo.SubCommands)
         {
@@ -84,7 +86,15 @@ internal static class OutputArgsBuilder
         sb.CloseMethod();
     }
 
-    internal static void GetOptionDeclaration(StringBuilderWrapper sb, PropInfo propInfo)
+    private static void InitializeDefaults(StringBuilderWrapper sb, CommandInfo commandInfo)
+    {
+        sb.OpenMethod($"""public void InitializeDefaults(Builder<{commandInfo.RootName}> builder, DefaultDataProvider<{commandInfo.RootName}>? defaultDataProvider)""");
+        sb.AppendLine("if (defaultDataProvider is null) return;");
+        sb.AppendLine("RegisterCustomDefaults(builder, defaultDataProvider);");
+        sb.CloseMethod();
+    }
+
+    internal static void GetOptionDeclaration(StringBuilderWrapper sb, CommandInfo commandInfo, PropInfo propInfo)
     {
         var description = propInfo.Description is null
                               ? "null"
@@ -97,13 +107,13 @@ internal static class OutputArgsBuilder
                 $"""Required = {(propInfo.IsRequiredForCli ? "true" : "false")},""",
                 "Recursive=true"]);
         sb.CloseCurly(endStatement: true);
-        AddSymbolToLookup(sb, propInfo, symbolName);
+        AddSymbolToLookup(sb, commandInfo, propInfo, symbolName);
         sb.AppendLine($"""cmd.Add({symbolName});""");
         sb.AppendLine();
 
     }
 
-    internal static void GetArgumentDeclaration(StringBuilderWrapper sb, PropInfo propInfo)
+    internal static void GetArgumentDeclaration(StringBuilderWrapper sb, CommandInfo commandInfo, PropInfo propInfo)
     {
         var description = propInfo.Description is null
                               ? "null"
@@ -116,7 +126,7 @@ internal static class OutputArgsBuilder
                 Required = {(propInfo.IsRequiredForCli ? "true" : "false")}
                 """);
         sb.CloseCurly(true, endStatement: true);
-        AddSymbolToLookup(sb, propInfo, symbolName);
+        AddSymbolToLookup(sb, commandInfo, propInfo, symbolName);
         sb.AppendLine($"""cmd.Add({symbolName});""");
         sb.AppendLine();
     }
@@ -129,9 +139,9 @@ internal static class OutputArgsBuilder
         sb.AppendLine();
     }
 
-    private static void AddSymbolToLookup(StringBuilderWrapper sb, PropInfo propInfo, string symbolName)
+    private static void AddSymbolToLookup(StringBuilderWrapper sb, CommandInfo commandInfo, PropInfo propInfo, string symbolName)
     {
-        sb.AppendLine($"""cliDataProvider.AddNameLookup("{propInfo.Name}", {symbolName});""");
+        sb.AppendLine($"""cliDataProvider.AddNameLookup((typeof({commandInfo.Name}), nameof({propInfo.Name})), {symbolName});""");
     }
 
     private static void CreateInstance(StringBuilderWrapper sb, CommandInfo commandInfo)
@@ -140,7 +150,7 @@ internal static class OutputArgsBuilder
 
         foreach (var propInfo in commandInfo.SelfAndAncestorPropInfos)
         {
-            sb.AppendLine($"""var {propInfo.Name.ToCamelCase()}DataValue = builder.GetDataValue<{propInfo.TypeName}>("{propInfo.Name}");""");
+            sb.AppendLine($"""var {propInfo.Name.ToCamelCase()}DataValue = builder.GetDataValue<{propInfo.TypeName}>((typeof({propInfo.ContainingTypeName}), nameof({propInfo.Name})));""");
         }
         var ctorArguments = commandInfo.SelfAndAncestorPropInfos.Select(p => $"{p.Name.ToCamelCase()}DataValue");
         sb.AppendLine();
@@ -160,7 +170,7 @@ internal static class OutputArgsBuilder
 
         foreach (var requiredValue in requiredValues)
         {
-            sb.AppendLine($"""validationFailures.Add(CheckRequiredValue<{requiredValue.TypeName}>("{requiredValue.Name}", builder.GetDataValue<string>("{requiredValue.Name}")));""");
+            sb.AppendLine($"""validationFailures.Add(CheckRequiredValue<{requiredValue.TypeName}>("{requiredValue.Name}", builder.GetDataValue<string>((typeof({commandInfo.Name}), "{requiredValue.Name}"))));""");
         }
 
         sb.AppendLine($"""

@@ -2,5 +2,5 @@
 
 public abstract class DataProvider
 {
-    public abstract bool TryGetValue<TValue>(string key, object[] alternateKeys, out DataValue<TValue> value);
+    public abstract bool TryGetValue<TValue>((Type argsType, string propertyName) key,  out DataValue<TValue>? value);
 }

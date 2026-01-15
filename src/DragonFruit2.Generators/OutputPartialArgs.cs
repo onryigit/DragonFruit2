@@ -17,6 +17,7 @@ internal class OutputPartialArgs
         Constructors(sb, commandInfo);
         ValidateMethod(sb, commandInfo);
         InitializeValidatorsMethod(sb, commandInfo);
+        RegisterCustomDefaultsPartialMethod(sb, commandInfo);
         GetArgsBuilder(sb, commandInfo);
 
         OutputArgsBuilder.GetClass(sb, commandInfo);
@@ -83,7 +84,7 @@ internal class OutputPartialArgs
 
         foreach (var propInfo in commandInfo.PropInfos)
         {
-            sb.AppendLine($"""if ({propInfo.Name.ToCamelCase()}DataValue.IsSet) {propInfo.Name} = {propInfo.Name.ToCamelCase()}DataValue.Value;""");
+            sb.AppendLine($"""if ({propInfo.Name.ToCamelCase()}DataValue is not null && {propInfo.Name.ToCamelCase()}DataValue.IsSet) {propInfo.Name} = {propInfo.Name.ToCamelCase()}DataValue.Value;""");
         }
 
         sb.CloseMethod();
@@ -139,6 +140,13 @@ internal class OutputPartialArgs
             }
         }
         sb.CloseMethod();
+    }
+
+    internal static void RegisterCustomDefaultsPartialMethod(StringBuilderWrapper sb, CommandInfo commandInfo)
+    {
+        sb.AppendLine();
+        sb.Append($"static partial void RegisterCustomDefaults(Builder<{commandInfo.RootName}> builder, DefaultDataProvider<{commandInfo.RootName}> defaultDataProvider);");
+        sb.AppendLine();
     }
 
     internal static void GetArgsBuilder(StringBuilderWrapper sb, CommandInfo commandInfo)
