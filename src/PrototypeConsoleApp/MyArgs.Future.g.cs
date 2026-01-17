@@ -5,7 +5,6 @@ using DragonFruit2;
 using DragonFruit2.Validators;
 using System.CommandLine;
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Cryptography;
 
 namespace SampleConsoleApp;
 
@@ -22,14 +21,25 @@ public partial class MyArgs : IArgs<MyArgs>
     }
 
     [SetsRequiredMembers()]
-    private MyArgs(DataValue<string> nameDataValue, DataValue<Int32> ageDataValue, DataValue<string> greetingDataValue)
+    private MyArgs(DataValue<string>? nameDataValue, DataValue<Int32>? ageDataValue, DataValue<string>? greetingDataValue)
         : this()
     {
-        if (nameDataValue.IsSet) Name = nameDataValue.Value;
-        if (ageDataValue.IsSet) Age = ageDataValue.Value;
-        if (greetingDataValue.IsSet) Greeting = greetingDataValue.Value;
-    }
+        // TODO: Resolve nullable warning when changing to tstrongly yped DataValue
+        if (ValueIsAvailable<string>(nameDataValue)) Name = nameDataValue.Value;
+        if (ValueIsAvailable<int>(ageDataValue)) Age = ageDataValue.Value;
+        if (ValueIsAvailable<string>(greetingDataValue)) Greeting = greetingDataValue.Value;
 
+
+        static bool ValueIsAvailable<T>([NotNullWhen(true)] DataValue<T>? dataValue)
+        {
+            return dataValue switch
+            {
+                null => false,
+                { IsSet: true } => true,
+                _ => false
+            };
+        }
+    }
 
     public IEnumerable<ValidationFailure> Validate()
     {
@@ -76,35 +86,27 @@ public partial class MyArgs : IArgs<MyArgs>
     /// <remarks>
     /// The first type argument of the base is the Args type this builder creates, and the second is the root Args type. 
     /// This means the two type arguments are the same for the root ArgsBuilder, but will differ for subcommand ArgsBuilders.
+    /// <br/>
+    /// Instances of this class are created in the <see IArgs.
     /// </remarks>
-    public class MyArgsBuilder : ArgsBuilder<MyArgs>
+    internal class MyArgsBuilder : ArgsBuilder<MyArgs>
     {
         static MyArgsBuilder()
         {
             ArgsBuilderCache<MyArgs>.AddArgsBuilder<MyArgs>(new MyArgsBuilder());
         }
 
-        public MyArgsBuilder()
-        {
+        //public MyArgsBuilder()
+        //{
 
-        }
+        //}
 
         public override void Initialize(Builder<MyArgs> builder)
         {
             // Generate for each data provider
-            InitializeCli(builder, builder.DataProviders.OfType<CliDataProvider<MyArgs>>().FirstOrDefault());
-            InitializeDefaults(builder, builder.DataProviders.OfType<DefaultDataProvider<MyArgs>>().FirstOrDefault());
+            InitializeCli(builder, builder.GetDataProvider<CliDataProvider<MyArgs>>());
+            InitializeDefaults(builder, builder.GetDataProvider<DefaultDataProvider<MyArgs>>());
         }
-
-        private void InitializeDefaults(Builder<MyArgs> builder, DefaultDataProvider<MyArgs>? defaultDataProvider)
-        {
-            if (defaultDataProvider is null) return;
-
-            // RegisterDefaults for attribute values and initialization
-
-            RegisterCustomDefaults(builder, defaultDataProvider);
-        }
-
 
         public override Command InitializeCli(Builder<MyArgs> builder, CliDataProvider<MyArgs>? cliDataProvider)
         {
@@ -143,6 +145,24 @@ public partial class MyArgs : IArgs<MyArgs>
             return rootCommand;
         }
 
+        private void InitializeDefaults(Builder<MyArgs> builder, DefaultDataProvider<MyArgs>? defaultDataProvider)
+        {
+            if (defaultDataProvider is null) return;
+
+            // RegisterDefaults for attribute values and initialization
+
+            RegisterCustomDefaults(builder, defaultDataProvider);
+        }
+
+        protected override MyArgs CreateInstance(Builder<MyArgs> builder)
+        {
+            var nameDataValue = builder.GetDataValue<string>((typeof(MyArgs), "Name"));
+            var ageDataValue = builder.GetDataValue<int>((typeof(MyArgs), "Age"));
+            var greetingDataValue = builder.GetDataValue<string>((typeof(MyArgs), "Greeting"));
+
+            return new MyArgs(nameDataValue, ageDataValue, greetingDataValue);
+        }
+     
         protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<MyArgs> builder)
         {
             var validationFailures = new List<ValidationFailure?>();
@@ -150,16 +170,6 @@ public partial class MyArgs : IArgs<MyArgs>
             return validationFailures
                     .Where(x => x is not null)
                     .Select(x => x!);
-        }
-
-        protected override MyArgs CreateInstance(Builder<MyArgs> builder)
-        {
-            var nameDataValue = builder.GetDataValue<string>( (typeof(MyArgs), "Name"));
-            var ageDataValue = builder.GetDataValue<int>((typeof(MyArgs), "Age"));
-            var greetingDataValue = builder.GetDataValue<string>((typeof(MyArgs), "Greeting"));
-
-            var newArgs = new MyArgs(nameDataValue, ageDataValue, greetingDataValue);
-            return newArgs;
         }
     }
 

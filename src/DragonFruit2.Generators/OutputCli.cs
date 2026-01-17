@@ -2,6 +2,10 @@
 
 namespace DragonFruit2.Generators;
 
+// The Cli uses a trick base on C# overload resolution behavior. Items in the current namespace have precedence over those in imported namespaces.
+// When the user initially creates the app, importing DragonFruit2 supplies a CLI class for IntelliSense. When generation occurs, this call
+// is replaced with the generated CLI. This design allows access to the RootArgsBuilder without complicating user code. In modern .NET, this 
+// could also be done with a static interface method. However, old .NET Framework...
 public class OutputCli
 {
     internal static string GetSource(IEnumerable<CommandInfo> commandInfos)
@@ -27,6 +31,7 @@ public class OutputCli
                        "# nullable enable",
                        "",
                        "using DragonFruit2;"]);
+        // This is necessary when the RootArgs is not in the same namespace as the call to `Cli.TryParse`, such as top-level statements 
         if (!string.IsNullOrEmpty(argsNamespace) && cliNamespace != argsNamespace)
         {
             sb.AppendLine($"using {argsNamespace};");
@@ -37,17 +42,19 @@ public class OutputCli
     { 
         sb.AppendLines([
                 "/// <summary>",
-                $"""/// Auto-generated partial class that supplies the root ArgsBuilder.""",
+                $"""/// Auto-generated partial class that supplies the root ArgsBuilder type.""",
                 "/// </summary>",
                 $"{commandInfo.ArgsAccessibility} class Cli"]);
         sb.OpenCurly();
     }
 
-    private static void ParseArgsMethod(CommandInfo commandInfo, StringBuilderWrapper sb)
+    private static void ParseArgsMethod(CommandInfo rootCommandInfo, StringBuilderWrapper sb)
     {
-        sb.OpenMethod($"public static Result<{commandInfo.Name}> ParseArgs<TRootArgs>(string[]? args = null)",
+        var rootName = rootCommandInfo.Name;
+        sb.OpenMethod($"public static Result<{rootName}> ParseArgs<TRootArgs>(string[]? args = null)",
             constraints: "TRootArgs : IArgs<TRootArgs>");
-        sb.AppendLine($"return DragonFruit2.Cli.ParseArgs<{commandInfo.Name}>(new {commandInfo.Name}.{commandInfo.Name}ArgsBuilder(), args);");
+        sb.AppendLine($"return DragonFruit2.Cli.ParseArgs<{rootName}, {rootName}.{rootName}ArgsBuilder>(args);");
         sb.CloseMethod();
     }
 }
+

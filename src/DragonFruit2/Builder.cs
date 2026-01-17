@@ -1,11 +1,13 @@
-﻿using DragonFruit2.Validators;
+﻿using DragonFruit2;
 
 namespace DragonFruit2;
 
-public class Builder<TRootArgs>
+public abstract class Builder<TRootArgs>
     where TRootArgs : class, IArgs<TRootArgs>
 {
-    public Builder(string[] commandLineArguments, DragonFruit2Configuration? configuration = null)
+    protected abstract ArgsBuilder<TRootArgs> GetRootArgsBuilder();
+
+    protected Builder(string[] commandLineArguments, DragonFruit2Configuration? configuration = null)
     {
         CommandLineArguments = commandLineArguments;
         AddDataProvider(new CliDataProvider<TRootArgs>(this));
@@ -14,8 +16,13 @@ public class Builder<TRootArgs>
     }
 
     public string[] CommandLineArguments { get; }
+
     public List<DataProvider> DataProviders { get; } = [];
     public DragonFruit2Configuration? Configuration { get; }
+
+    public TDataProvider GetDataProvider<TDataProvider>()
+            where TDataProvider : DataProvider
+        => DataProviders.OfType<TDataProvider>().FirstOrDefault();
 
     public void AddDataProvider(DataProvider provider, int position = int.MaxValue)
     {
@@ -34,7 +41,7 @@ public class Builder<TRootArgs>
     {
         foreach (var dataProvider in DataProviders)
         {
-            if (dataProvider.TryGetValue<T>(key,  out var dataValue))
+            if (dataProvider.TryGetValue<T>(key, out var dataValue))
             {
                 return dataValue;
             }
@@ -42,9 +49,9 @@ public class Builder<TRootArgs>
         return null;
     }
 
-    public Result<TRootArgs> ParseArgs(ArgsBuilder<TRootArgs> argsBuilder)
+    public Result<TRootArgs> ParseArgs(string[] args)
     {
-        argsBuilder.Initialize(this);
+        GetRootArgsBuilder().Initialize(this);
 
         var cliDataProvider = DataProviders.OfType<IActiveArgsBuilderProvider<TRootArgs>>().FirstOrDefault()
             ?? throw new InvalidOperationException("Internal error: CliDataProvider not found");
@@ -56,3 +63,32 @@ public class Builder<TRootArgs>
                     : activeArgsBuilder.CreateArgs(this, failures);
     }
 }
+
+internal class Builder<TRootArgs, TRootArgsBuilder> : Builder<TRootArgs>
+        where TRootArgs : class, IArgs<TRootArgs>
+        where TRootArgsBuilder : ArgsBuilder<TRootArgs>, new()
+{
+    private TRootArgsBuilder argsBuilder;
+
+    public Builder(string[] args)
+        : base(args)
+    {
+        argsBuilder = new TRootArgsBuilder()
+        {
+            Builder = this
+        };
+    }
+
+    protected override ArgsBuilder<TRootArgs> GetRootArgsBuilder()
+    {
+        return argsBuilder;
+    }
+
+
+    public Builder(string[] commandLineArguments, DragonFruit2Configuration? configuration = null)
+        : base(commandLineArguments, configuration)
+    {
+    }
+}
+
+

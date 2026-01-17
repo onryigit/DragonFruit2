@@ -5,9 +5,9 @@ using System.CommandLine.Parsing;
 namespace DragonFruit2;
 
 public class CliDataProvider<TRootArgs> : DataProvider, IActiveArgsBuilderProvider<TRootArgs>
-            where TRootArgs : class, IArgs<TRootArgs>
+    where TRootArgs : class, IArgs<TRootArgs> 
 {
-    public CliDataProvider(Builder<TRootArgs> builder)
+    public CliDataProvider(Builder<TRootArgs> builder) 
     {
         InputArgs = builder.CommandLineArguments;
     }

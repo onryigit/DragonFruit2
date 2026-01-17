@@ -43,13 +43,9 @@ internal class OutputPartialArgs
     internal static void OpenClass(CommandInfo commandInfo, StringBuilderWrapper sb)
     {
         var baseType = commandInfo.BaseName ?? $"IArgs<{commandInfo.Name}>";
-        sb.AppendLines([
-                "/// <summary>",
-                $"""/// Auto-generated partial class for building CLI commands for <see cref="{commandInfo.Name}" />""",
-                $"""/// and creating a new {commandInfo.Name} instance from a <see cref="System.CommandLine.ParseResult" />.""",
-                "/// </summary>",
-                $"{commandInfo.ArgsAccessibility} partial class {commandInfo.Name} : {baseType}"]);
-        sb.OpenCurly();
+        sb.XmlSummary(
+                $"""Auto-generated partial class for building CLI commands for <see cref="{commandInfo.Name}"/>" and creating a new {commandInfo.Name} instance from a <see cref="System.CommandLine.ParseResult" />.""");
+        sb.OpenClass($"{commandInfo.ArgsAccessibility} partial class {commandInfo.Name} : {baseType}");
     }
 
     internal static void FieldsAndProperties(StringBuilderWrapper sb, CommandInfo commandInfo)
@@ -80,17 +76,28 @@ internal class OutputPartialArgs
             : commandInfo.PropInfos.Any()
                 ? "this()"
                 : null;
-        sb.OpenMethod($"protected {commandInfo.Name}({string.Join(", ", parameters)})", calledCtor);
+        sb.OpenConstructor($"protected {commandInfo.Name}({string.Join(", ", parameters)})", calledCtor);
 
         foreach (var propInfo in commandInfo.PropInfos)
         {
-            sb.AppendLine($"""if ({propInfo.Name.ToCamelCase()}DataValue is not null && {propInfo.Name.ToCamelCase()}DataValue.IsSet) {propInfo.Name} = {propInfo.Name.ToCamelCase()}DataValue.Value;""");
+
+            string dataValueName = $"{propInfo.Name.ToCamelCase()}DataValue";
+            sb.AppendLine($"""if (ValueIsAvailable({dataValueName})) {propInfo.Name} = {dataValueName}.Value;""");
         }
 
+        sb.OpenMethod("static bool ValueIsAvailable<T>([NotNullWhen(true)] DataValue<T>? dataValue)");
+        sb.AppendLine("return dataValue switch");
+        sb.OpenCurly();
+        sb.AppendLine("null => false,");
+        sb.AppendLine("{ IsSet: true } => true,");
+        sb.AppendLine("_ => false");
+        sb.CloseCurly(endStatement: true);
         sb.CloseMethod();
 
+        sb.CloseConstructor();
+
         static string CtorParameter(PropInfo p)
-            => $"DataValue<{p.TypeName}> {p.Name.ToCamelCase()}DataValue";
+            => $"DataValue<{p.TypeName}>? {p.Name.ToCamelCase()}DataValue";
     }
 
     internal static void ValidateMethod(StringBuilderWrapper sb, CommandInfo commandInfo)
@@ -149,12 +156,11 @@ internal class OutputPartialArgs
         sb.AppendLine();
     }
 
+
     internal static void GetArgsBuilder(StringBuilderWrapper sb, CommandInfo commandInfo)
     {
         sb.OpenMethod($"public static ArgsBuilder<{commandInfo.RootName}> GetArgsBuilder(Builder<{commandInfo.RootName}> builder)");
         sb.AppendLine($"return new {commandInfo.Name}.{commandInfo.Name}ArgsBuilder();");
         sb.CloseMethod();
     }
-
-
 }

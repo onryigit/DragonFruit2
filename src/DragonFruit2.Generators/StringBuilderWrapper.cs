@@ -1,4 +1,5 @@
 ﻿using DragonFruit2.GeneratorSupport;
+using System.Data;
 using System.Numerics;
 using System.Text;
 
@@ -66,17 +67,46 @@ internal class StringBuilderWrapper
         }
     }
 
-    public void CloseClass()
-       => CloseCurly();
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="classDeclaration"></param>
+    /// <param name="bases"></param>
+    /// <param name="constraints">Should not include `where`, for example T : new()</param>
+    public void OpenClass(string classDeclaration, string[]? constraints = null)
+    {
+        AppendLine(classDeclaration);
+        if (constraints is not null && constraints.Any())
+        {
+            foreach (var constraint in constraints)
+            {
+                AppendLine($"    where {constraint}");
+            }
+        }
+        OpenCurly();
+    }
 
-    public void OpenMethod(string line, string? baseCtor = null, string? constraints = null)
+    public void CloseClass()
+        => CloseCurly();
+
+    public void OpenConstructor(string declaration, string? baseCtor = null)
     {
         AppendLine();
-        AppendLine(line);
+        AppendLine(declaration);
         if (baseCtor is not null)
         {
             AppendLine($"    : {baseCtor}");
         }
+        OpenCurly();
+    }
+
+    public void CloseConstructor()
+       => CloseCurly();
+
+    public void OpenMethod(string declaration, string? constraints = null)
+    {
+        AppendLine();
+        AppendLine(declaration);
         if (constraints is not null)
         {
             AppendLine($"      where {constraints}");
@@ -113,5 +143,10 @@ internal class StringBuilderWrapper
         AppendLine("/// <remarks>");
         AppendLine($"/// {remarks}");
         AppendLine("/// </remarks>");
+    }
+
+    internal void Comment(string line)
+    {
+        AppendLine($"// {line}");
     }
 }

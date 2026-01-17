@@ -17,7 +17,7 @@ public static class Cli
     public static Result<TRootArgs> ParseArgs<TRootArgs>(string[]? args = null)
         where TRootArgs : class, IArgs<TRootArgs>
     {
-        throw new InvalidOperationException("This method is a stub for source generation. If you see this error, there is probably a problem with source generation.");
+        throw new InvalidOperationException("This method is a stub for source generation. You either called `DragonFruit2.Cli.TryParse` instead of an import for DragonFruit2 and `Cli.TryParse' or there is a problem with source generation.");
         //args ??= Environment.GetCommandLineArgs();
 
         //var argsDataValues = new Builder<TRootArgs>().ParseArgs(args);
@@ -39,6 +39,6 @@ public static class Cli
         // The first item is the exe/dll name
         args ??= Environment.GetCommandLineArgs().Skip(1).ToArray();
 
-        return new Builder<TRootArgs, TRootArgsBuilder>(args).ParseArgs();
+        return new Builder<TRootArgs, TRootArgsBuilder>(args).ParseArgs(args);
     }
 }

@@ -23,8 +23,18 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
     public abstract void Initialize(Builder<TRootArgs> builder);
     public abstract Command InitializeCli(Builder<TRootArgs> builder, CliDataProvider<TRootArgs>? cliDataProvider);
     protected abstract TRootArgs CreateInstance(Builder<TRootArgs> builder);
-
     protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(Builder<TRootArgs> builder);
+
+    public Builder<TRootArgs>? Builder
+    {
+        get;
+        set
+        {
+            if (field is not null) throw new InvalidOperationException("The Builder only be set once");
+        }
+    }
+
+
 
     public Result<TRootArgs> CreateArgs(Builder<TRootArgs> builder, IEnumerable<ValidationFailure>? existingFailures)
     {

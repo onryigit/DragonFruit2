@@ -19,29 +19,17 @@ internal static class OutputArgsBuilder
     internal static void OpenClass(CommandInfo commandInfo, StringBuilderWrapper sb)
     {
         sb.AppendLine();
-        sb.AppendLines([
-                "/// <summary>",
-                "/// </summary>",
-                $"internal class {commandInfo.Name}ArgsBuilder : ArgsBuilder<{commandInfo.RootName}>"]);
-        sb.OpenCurly();
-        //sb.AppendLine($$"""public ArgsBuilder<{{commandInfo.RootName}}>? ActiveArgsBuilder { get; set; }""");
+        sb.XmlSummary(" This static builder supplies the CLI declaration and filling the Result and return instance.");
+        sb.XmlRemarks(" The first type argument of the base is the Args type this builder creates, and the second is the root Args type. This means the two type arguments are the same for the root ArgsBuilder, but will differ for subcommand ArgsBuilders.");
+        sb.OpenClass($"internal class {commandInfo.Name}ArgsBuilder : ArgsBuilder<{commandInfo.RootName}>");
     }
 
-    internal static void StaticConstructor(CommandInfo commandInfo, StringBuilderWrapper sb)
-    {
-        sb.XmlSummary("This static builder supplies the CLI declaration and filling the Result and return instance.");
-        sb.XmlRemarks("The first type argument of the base is the Args type this builder creates, and the second is the root Args type. This means the two type arguments are the same for the root ArgsBuilder, but will differ for subcommand ArgsBuilders.");
-        sb.OpenMethod($"""static {commandInfo.Name}ArgsBuilder()""");
-        sb.AppendLine($"""ArgsBuilderCache<{commandInfo.RootName}>.AddArgsBuilder<{commandInfo.Name}> (new {commandInfo.Name}ArgsBuilder());""");
-        sb.CloseMethod();
-
-    }
 
     private static void Initialize(StringBuilderWrapper sb, CommandInfo commandInfo)
     {
         sb.OpenMethod($"""public override void Initialize(Builder<{commandInfo.RootName}> builder)""");
-        sb.AppendLine($"InitializeCli(builder, builder.DataProviders.OfType<CliDataProvider<{commandInfo.RootName}>>().FirstOrDefault());");
-        sb.AppendLine($"InitializeDefaults(builder, builder.DataProviders.OfType<DefaultDataProvider<{commandInfo.RootName}>>().FirstOrDefault());");
+        sb.AppendLine($"InitializeCli(builder, builder.GetDataProvider<CliDataProvider<{commandInfo.RootName}>>());");
+        sb.AppendLine($"InitializeDefaults(builder, builder.GetDataProvider<DefaultDataProvider<{commandInfo.RootName}>>());");
         sb.CloseMethod();
 
         InitializeCli(sb, commandInfo);
@@ -90,6 +78,7 @@ internal static class OutputArgsBuilder
     {
         sb.OpenMethod($"""public void InitializeDefaults(Builder<{commandInfo.RootName}> builder, DefaultDataProvider<{commandInfo.RootName}>? defaultDataProvider)""");
         sb.AppendLine("if (defaultDataProvider is null) return;");
+        sb.Comment("TODO: Register defaults based on attributes, initializer, and the RegisterDefault calls");
         sb.AppendLine("RegisterCustomDefaults(builder, defaultDataProvider);");
         sb.CloseMethod();
     }
@@ -150,7 +139,8 @@ internal static class OutputArgsBuilder
 
         foreach (var propInfo in commandInfo.SelfAndAncestorPropInfos)
         {
-            sb.AppendLine($"""var {propInfo.Name.ToCamelCase()}DataValue = builder.GetDataValue<{propInfo.TypeName}>((typeof({propInfo.ContainingTypeName}), nameof({propInfo.Name})));""");
+            string localName = propInfo.Name.ToCamelCase();
+            sb.AppendLine($"""var {localName}DataValue = builder.GetDataValue<{propInfo.TypeName}>((typeof({propInfo.ContainingTypeName}), nameof({propInfo.Name})));""");
         }
         var ctorArguments = commandInfo.SelfAndAncestorPropInfos.Select(p => $"{p.Name.ToCamelCase()}DataValue");
         sb.AppendLine();
@@ -170,14 +160,15 @@ internal static class OutputArgsBuilder
 
         foreach (var requiredValue in requiredValues)
         {
-            sb.AppendLine($"""validationFailures.Add(CheckRequiredValue<{requiredValue.TypeName}>("{requiredValue.Name}", builder.GetDataValue<string>((typeof({commandInfo.Name}), "{requiredValue.Name}"))));""");
+            var propName = requiredValue.Name;
+            sb.AppendLine($"""validationFailures.Add(CheckRequiredValue<{requiredValue.TypeName}>("{propName}", builder.GetDataValue<{requiredValue.TypeName}>((typeof({commandInfo.Name}), "{propName}"))));""");
         }
 
-        sb.AppendLine($"""
-            return validationFailures
-                       .Where(x => x is not null)
-                       .Select(x => x!);
-            """);
+        sb.AppendLines([
+            "return validationFailures",
+            "          .Where(x => x is not null)",
+            "          .Select(x => x!);"
+            ]);
 
         sb.CloseMethod();
     }
