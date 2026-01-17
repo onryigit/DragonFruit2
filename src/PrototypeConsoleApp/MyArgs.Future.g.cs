@@ -84,6 +84,11 @@ public partial class MyArgs : IArgs<MyArgs>
             ArgsBuilderCache<MyArgs>.AddArgsBuilder<MyArgs>(new MyArgsBuilder());
         }
 
+        public MyArgsBuilder()
+        {
+
+        }
+
         public override void Initialize(Builder<MyArgs> builder)
         {
             // Generate for each data provider
@@ -160,16 +165,17 @@ public partial class MyArgs : IArgs<MyArgs>
 
 
 
-    //public class MyArgsDataValues : Result<MyArgs>
-    //{
-    //    public MyArgsDataValues(Builder<MyArgs> builder)
-    //    {
-    //        NameDataValue = builder.GetDataValue<string>("Name");
-    //        AgeDataValue = builder.GetDataValue<int>("Age");
-    //        GreetingDataValue = builder.GetDataValue<string>("Greeting");
-    //    }
-    //    public DataValue<string> NameDataValue { get; init; }
-    //    public DataValue<int> AgeDataValue { get; init; }
-    //    public DataValue<string> GreetingDataValue { get; init; }
-    //}
+    public class MyArgsDataValues
+    {
+        internal MyArgsDataValues(Builder<MyArgs> builder)
+        {
+            this.builder = builder; // Suppress CS8618 by assigning a non-null value (null-forgiving operator)
+        }
+
+        private Builder<MyArgs> builder;
+
+        public DataValue<string>? NameDataValue => field ??= builder.GetDataValue<string>((typeof(MyArgs), nameof(NameDataValue)));
+        public DataValue<int>? AgeDataValue => field ??= builder.GetDataValue<int>((typeof(MyArgs), nameof(NameDataValue)));
+        public DataValue<string>? GreetingDataValue => field ??= builder.GetDataValue<string>((typeof(MyArgs), nameof(NameDataValue)));
+    }
 }

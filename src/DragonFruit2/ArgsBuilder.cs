@@ -19,16 +19,6 @@ public abstract class ArgsBuilder
 public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
    where TRootArgs : class, IArgs<TRootArgs>
 {
-    //protected static CliDataProvider<TRootArgs> GetCliDataProvider(Builder<TRootArgs> builder)
-    //{
-    //    var cliDataProvider = builder.DataProviders.OfType<CliDataProvider<TRootArgs>>().FirstOrDefault();
-    //    if (cliDataProvider is null)
-    //    {
-    //        cliDataProvider = new CliDataProvider<TRootArgs>(builder);
-    //        builder.DataProviders.Add(cliDataProvider);
-    //    }
-    //    return cliDataProvider;
-    //}
 
     public abstract void Initialize(Builder<TRootArgs> builder);
     public abstract Command InitializeCli(Builder<TRootArgs> builder, CliDataProvider<TRootArgs>? cliDataProvider);

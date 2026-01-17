@@ -32,12 +32,13 @@ public static class Cli
     /// <typeparam name="TRootArgs">The type containing the CLI definition</typeparam>
     /// <param name="args">Optionaly pass the commandline args</param>
     /// <returns></returns>
-    public static Result<TRootArgs> ParseArgs<TRootArgs>(ArgsBuilder<TRootArgs> rootArgsBuilder, string[]? args = null)
+    public static Result<TRootArgs> ParseArgs<TRootArgs, TRootArgsBuilder> ( string[]? args = null)
         where TRootArgs : class, IArgs<TRootArgs>
+        where TRootArgsBuilder : ArgsBuilder<TRootArgs>, new()
     {
         // The first item is the exe/dll name
         args ??= Environment.GetCommandLineArgs().Skip(1).ToArray();
 
-        return new Builder<TRootArgs>(args).ParseArgs(rootArgsBuilder);
+        return new Builder<TRootArgs, TRootArgsBuilder>(args).ParseArgs();
     }
 }
