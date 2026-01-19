@@ -37,16 +37,15 @@ public abstract class Builder<TRootArgs>
         }
     }
 
-    public DataValue<T>? GetDataValue<T>((Type argsType, string propertyName) key)
+    public void SetDataValue<TValue>((Type argsType, string propertyName) key, DataValue<TValue> dataValue)
     {
         foreach (var dataProvider in DataProviders)
         {
-            if (dataProvider.TryGetValue<T>(key, out var dataValue))
+            if (dataProvider.TryGetValue(key, dataValue))
             {
-                return dataValue;
+                return;
             }
         }
-        return null;
     }
 
     public Result<TRootArgs> ParseArgs(string[] args)

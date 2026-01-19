@@ -9,8 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace MyNamespace
 {
     /// <summary>
-    /// Auto-generated partial class for building CLI commands for <see cref="MyArgs" />
-    /// and creating a new MyArgs instance from a <see cref="System.CommandLine.ParseResult" />.
+    /// Auto-generated partial class for building CLI commands for <see cref="MyArgs"/>" and creating a new MyArgs instance from a <see cref="System.CommandLine.ParseResult" />.
     /// </summary>
     public partial class MyArgs : IArgs<MyArgs>
     {
@@ -20,10 +19,20 @@ namespace MyNamespace
         {
         }
         [SetsRequiredMembers()]
-        protected MyArgs(DataValue<string> nameDataValue)
+        protected MyArgs(DataValue<string>? nameDataValue)
             : this()
         {
-            if (nameDataValue is not null && nameDataValue.IsSet) Name = nameDataValue.Value;
+            if (ValueIsAvailable(nameDataValue)) Name = nameDataValue.Value;
+
+            static bool ValueIsAvailable<T>([NotNullWhen(true)] DataValue<T>? dataValue)
+            {
+                return dataValue switch
+                {
+                    null => false,
+                    { IsSet: true } => true,
+                    _ => false
+                };
+            }
         }
 
         public IEnumerable<ValidationFailure> Validate()
@@ -47,13 +56,18 @@ namespace MyNamespace
         }
 
         /// <summary>
+        ///  This static builder supplies the CLI declaration and filling the Result and return instance.
         /// </summary>
+        /// <remarks>
+        ///  The first type argument of the base is the Args type this builder creates, and the second is the root Args type. This means the two type arguments are the same for the root ArgsBuilder, but will differ for subcommand ArgsBuilders.
+        /// </remarks>
         internal class MyArgsArgsBuilder : ArgsBuilder<>
         {
 
             public override void Initialize(Builder<> builder)
             {
-                InitializeCli(builder, builder.DataProviders.OfType<CliDataProvider<>>().FirstOrDefault());
+                InitializeCli(builder, builder.GetDataProvider<CliDataProvider<>>());
+                InitializeDefaults(builder, builder.GetDataProvider<DefaultDataProvider<>>());
             }
 
             public override Command InitializeCli(Builder<> builder, CliDataProvider<>? cliDataProvider)
@@ -82,23 +96,52 @@ namespace MyNamespace
                 return cmd;
             }
 
-
-            protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<> builder)
+            public void InitializeDefaults(Builder<> builder, DefaultDataProvider<>? defaultDataProvider)
             {
-                var validationFailures = new List<ValidationFailure?>();
-                validationFailures.Add(CheckRequiredValue<string>("Name", builder.GetDataValue<string>((typeof(MyArgs), "Name"))));
-                return validationFailures
-           .Where(x => x is not null)
-           .Select(x => x!);
+                if (defaultDataProvider is null) return;
+                // TODO: Register defaults based on attributes, initializer, and the RegisterDefault calls
+                RegisterCustomDefaults(builder, defaultDataProvider);
             }
 
-            protected override  CreateInstance(Builder<> builder)
-            {
-                var nameDataValue = builder.GetDataValue<string>((typeof(MyArgs), nameof(Name)));
 
-                var newArgs = new MyArgs(nameDataValue);
-                return newArgs;
+            protected override IEnumerable<ValidationFailure> CheckRequiredValues(DataValues dataValues)
+            {
+                if (dataValues is not MyArgsDataValues typedDataValues)
+                {
+                    throw new InvalidOperationException("Internal error: passed incorrect data values");
+                }
+                var requiredFailures = new List<ValidationFailure?>();
+                AddRequiredFailureIfNeeded<string>(requiredFailures, !typedDataValues.Name.IsSet, nameof(Name));
+                return requiredFailures
+                          .Where(x => x is not null)
+                          .Select(x => x!);
             }
+
+            protected override DataValues CreateDataValues()
+            {
+                return new MyArgsDataValues();
+            }
+
+            protected override  CreateInstance(DataValues dataValues)
+            {
+                if (dataValues is not MyArgsDataValues typedDataValues)
+                {
+                    throw new InvalidOperationException("Internal error: passed incorrect data values");
+                }
+
+                return new MyArgs(typedDataValues.Name);            }
+        }
+
+        public class MyArgsDataValues : DataValues
+        {
+
+            public override void SetDataValues(DataProvider dataProvider)
+            {
+                dataProvider.SetDataValue((typeof(MyArgs), nameof(Name)), Name);
+            }
+
+            private Type argsType = typeof(MyArgs);
+            public DataValue<string> Name { get; } = DataValue<string>.Create(nameof(Name), typeof(MyArgs));
         }
     }
 }

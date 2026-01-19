@@ -1,19 +1,27 @@
 ﻿namespace DragonFruit2;
 
-public record class DataValue<T> : IDataValue
+public record class DataValue<TValue> : IDataValue
 {
-    public static DataValue<T> Create(T? value, DataProvider setBy)
-        => new(value, setBy);
+    public static DataValue<TValue> Create(string name, Type argsType)
+        => new(name, argsType);
 
-    private DataValue(T? value, DataProvider setBy)
+    private DataValue(string name, Type argsType)
     {
-        Value = value;
-        SetBy = setBy;
+        Name = name;
+        ArgsType = argsType;
     }
 
-    public T? Value { get; }
+    public string Name { get; }
+    public Type ArgsType { get; }
 
-    public DataProvider SetBy { get; }
+    public TValue? Value { get; private set; }
+    public DataProvider? SetBy { get; private set; }
 
     public bool IsSet => SetBy is not null;
+
+    public void SetValue(TValue value, DataProvider setBy)
+    {
+        SetBy = setBy;
+        Value = value;
+    }
 }

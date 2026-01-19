@@ -26,6 +26,6 @@ public partial class MyArgs
 
     static partial void RegisterCustomDefaults(Builder<MyArgs> builder, DefaultDataProvider<MyArgs> defaultDataProvider)
     {
-        defaultDataProvider.RegisterDefault((typeof(MyArgs), nameof(Greeting)), "Hi there!");
+        defaultDataProvider.RegisterDefault(typeof(MyArgs), nameof(Greeting), "Hi there!");
     }
 }

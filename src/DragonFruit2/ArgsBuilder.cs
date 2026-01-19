@@ -22,8 +22,9 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
 
     public abstract void Initialize(Builder<TRootArgs> builder);
     public abstract Command InitializeCli(Builder<TRootArgs> builder, CliDataProvider<TRootArgs>? cliDataProvider);
-    protected abstract TRootArgs CreateInstance(Builder<TRootArgs> builder);
-    protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(Builder<TRootArgs> builder);
+    protected abstract TRootArgs CreateInstance(DataValues dataValues);
+    protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(DataValues dataValues);
+    protected abstract DataValues CreateDataValues();
 
     public Builder<TRootArgs>? Builder
     {
@@ -34,17 +35,21 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
         }
     }
 
-
-
     public Result<TRootArgs> CreateArgs(Builder<TRootArgs> builder, IEnumerable<ValidationFailure>? existingFailures)
     {
         existingFailures ??= Enumerable.Empty<ValidationFailure>();
-        var currentFailures = existingFailures.Concat(CheckRequiredValues(builder));
+        var dataValues = CreateDataValues();
+        foreach (var dataProvider in builder.DataProviders)
+        {
+            dataValues.SetDataValues(dataProvider);
+        }
+
+        var currentFailures = existingFailures.Concat(CheckRequiredValues(dataValues));
 
         TRootArgs? args = null;
         if (!currentFailures.Any(x => x.Severity == DiagnosticSeverity.Error))
         {
-            args = CreateInstance(builder);
+            args = CreateInstance(dataValues);
         }
 
         var result = new Result<TRootArgs>(currentFailures, args);
@@ -57,14 +62,32 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
         return result;
     }
 
-    protected ValidationFailure? CheckRequiredValue<TValue>(string valueName, DataValue<TValue>? dataValue)
+    //protected ValidationFailure? CheckRequiredValue<TValue>(string valueName, DataValue<TValue>? dataValue)
+    //{
+    //    if (dataValue is null || !dataValue.IsSet)
+    //    {
+    //        var message = $"The value for {valueName} is required but was not provided.";
+    //        var idString = $"{Validator.ToValidationIdString(ValidationId.Required)};";
+    //        return new ValidationFailure<TValue>(idString, message, valueName, DiagnosticSeverity.Error, dataValue.Value);
+    //    }
+    //    return null;
+    //}
+
+    protected void AddFailureIfNeeded<TValue>(List<ValidationFailure> validationFailures, bool hasFailed, TValue value, string valueName, string idString, string message)
     {
-        if (dataValue is null || !dataValue.IsSet)
+        // TODO: Replace Id and message with closer adherence to Roslyn diagnostic patterns
+        if (hasFailed)
         {
-            var message = $"The value for {valueName} is required but was not provided.";
-            var idString = $"{Validator.ToValidationIdString(ValidationId.Required)};";
-            return new ValidationFailure<TValue>(idString, message, valueName, DiagnosticSeverity.Error, dataValue.Value);
+            validationFailures.Add(new ValidationFailure<TValue>(idString, message, valueName, DiagnosticSeverity.Error, value));
         }
-        return null;
+    }
+
+    protected void AddRequiredFailureIfNeeded<TValue>(List<ValidationFailure> validationFailures, bool hasFailed, string valueName)
+    {
+        // TODO: Replace Id and message with closer adherence to Roslyn diagnostic patterns
+        if (hasFailed)
+        {
+            validationFailures.Add(new ValidationFailure(ValidationId.Required.ToValidationIdString(),$"Required value {valueName} noy provided.", valueName, DiagnosticSeverity.Error));
+        }
     }
 }

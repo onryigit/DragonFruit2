@@ -96,10 +96,6 @@ public partial class MyArgs : IArgs<MyArgs>
             ArgsBuilderCache<MyArgs>.AddArgsBuilder<MyArgs>(new MyArgsBuilder());
         }
 
-        //public MyArgsBuilder()
-        //{
-
-        //}
 
         public override void Initialize(Builder<MyArgs> builder)
         {
@@ -154,38 +150,49 @@ public partial class MyArgs : IArgs<MyArgs>
             RegisterCustomDefaults(builder, defaultDataProvider);
         }
 
-        protected override MyArgs CreateInstance(Builder<MyArgs> builder)
+        protected override MyArgs CreateInstance(DataValues dataValues)
         {
-            var nameDataValue = builder.GetDataValue<string>((typeof(MyArgs), "Name"));
-            var ageDataValue = builder.GetDataValue<int>((typeof(MyArgs), "Age"));
-            var greetingDataValue = builder.GetDataValue<string>((typeof(MyArgs), "Greeting"));
+            if (dataValues is not MyArgsDataValues typedDataValues)
+            {
+                throw new InvalidOperationException("Internal error: passed incorrect data values");
+            }
 
-            return new MyArgs(nameDataValue, ageDataValue, greetingDataValue);
+            return new MyArgs(typedDataValues.Name, typedDataValues.Age, typedDataValues.Greeting);
         }
-     
-        protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<MyArgs> builder)
+
+        protected override IEnumerable<ValidationFailure> CheckRequiredValues(DataValues dataValues)
         {
-            var validationFailures = new List<ValidationFailure?>();
-            validationFailures.Add(CheckRequiredValue<string>("Name", builder.GetDataValue<string>((typeof(MyArgs), "Name"))));
-            return validationFailures
+            if (dataValues is not MyArgsDataValues typedDataValues)
+            {
+                throw new InvalidOperationException("Internal error: passed incorrect data values");
+            }
+
+            var requiredFailures = new List<ValidationFailure>();
+            AddRequiredFailureIfNeeded<string>(requiredFailures, !typedDataValues.Name.IsSet, nameof(typedDataValues.Name));
+            return requiredFailures
                     .Where(x => x is not null)
                     .Select(x => x!);
         }
+
+        protected override DataValues CreateDataValues()
+            => new MyArgsDataValues();
     }
 
 
 
-    public class MyArgsDataValues
+    public class MyArgsDataValues : DataValues
     {
-        internal MyArgsDataValues(Builder<MyArgs> builder)
+        public override void SetDataValues(DataProvider dataProvider)
         {
-            this.builder = builder; // Suppress CS8618 by assigning a non-null value (null-forgiving operator)
+            dataProvider.SetDataValue((typeof(MyArgs), nameof(Name)), Name);
+            dataProvider.SetDataValue((typeof(MyArgs), nameof(Age)), Age);
+            dataProvider.SetDataValue((typeof(MyArgs), nameof(Greeting)), Greeting);
         }
 
-        private Builder<MyArgs> builder;
+        private Type argsType = typeof(MyArgs);
 
-        public DataValue<string>? NameDataValue => field ??= builder.GetDataValue<string>((typeof(MyArgs), nameof(NameDataValue)));
-        public DataValue<int>? AgeDataValue => field ??= builder.GetDataValue<int>((typeof(MyArgs), nameof(NameDataValue)));
-        public DataValue<string>? GreetingDataValue => field ??= builder.GetDataValue<string>((typeof(MyArgs), nameof(NameDataValue)));
+        public DataValue<string> Name { get; } = DataValue<string>.Create(nameof(Name), typeof(MyArgs));
+        public DataValue<int> Age { get; } = DataValue<int>.Create(nameof(Age), typeof(int));
+        public DataValue<string> Greeting {  get; }= DataValue<string>.Create(nameof(Greeting), typeof(string));
     }
 }

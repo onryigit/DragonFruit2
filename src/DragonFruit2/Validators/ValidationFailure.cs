@@ -1,6 +1,4 @@
-﻿using System.Xml.Schema;
-
-namespace DragonFruit2.Validators;
+﻿namespace DragonFruit2.Validators;
 //
 
 public record class ValidationFailure(string Id, string Message, string ValueName, DiagnosticSeverity Severity) { }

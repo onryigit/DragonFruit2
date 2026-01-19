@@ -12,6 +12,7 @@ internal static class OutputArgsBuilder
         Initialize(sb, commandInfo);
         sb.AppendLine();
         CheckRequiredValues(sb, commandInfo);  // not yet implemented
+        CreateDataValues(sb, commandInfo);
         CreateInstance(sb, commandInfo);
 
         sb.CloseClass();
@@ -135,41 +136,49 @@ internal static class OutputArgsBuilder
 
     private static void CreateInstance(StringBuilderWrapper sb, CommandInfo commandInfo)
     {
-        sb.OpenMethod($"""protected override {commandInfo.RootName} CreateInstance(Builder<{commandInfo.RootName}> builder)""");
+        sb.OpenMethod($"""protected override {commandInfo.RootName} CreateInstance(DataValues dataValues)""");
 
-        foreach (var propInfo in commandInfo.SelfAndAncestorPropInfos)
-        {
-            string localName = propInfo.Name.ToCamelCase();
-            sb.AppendLine($"""var {localName}DataValue = builder.GetDataValue<{propInfo.TypeName}>((typeof({propInfo.ContainingTypeName}), nameof({propInfo.Name})));""");
-        }
-        var ctorArguments = commandInfo.SelfAndAncestorPropInfos.Select(p => $"{p.Name.ToCamelCase()}DataValue");
+        sb.OpenIf($"dataValues is not {commandInfo.Name}DataValues typedDataValues");
+        sb.AppendLine("throw new InvalidOperationException(\"Internal error: passed incorrect data values\");");
+        sb.CloseIf();
+
+        var ctorArguments = commandInfo.SelfAndAncestorPropInfos.Select(p => $"typedDataValues.{p.Name}");
         sb.AppendLine();
-        sb.Append($"""var newArgs = new {commandInfo.Name}({string.Join(", ", ctorArguments)});""");
-        sb.AppendLine();
-        sb.AppendLine($"""return newArgs;""");
+        sb.Append($"return new {commandInfo.Name}({string.Join(", ", ctorArguments)});");
         sb.CloseMethod();
 
     }
 
     private static void CheckRequiredValues(StringBuilderWrapper sb, CommandInfo commandInfo)
     {
-        sb.OpenMethod($"""protected override IEnumerable<ValidationFailure> CheckRequiredValues(Builder<{commandInfo.RootName}> builder)""");
+        sb.OpenMethod($"""protected override IEnumerable<ValidationFailure> CheckRequiredValues(DataValues dataValues)""");
+
+        sb.OpenIf($"dataValues is not {commandInfo.Name}DataValues typedDataValues");
+        sb.AppendLine("throw new InvalidOperationException(\"Internal error: passed incorrect data values\");");
+        sb.CloseIf();
 
         var requiredValues = commandInfo.PropInfos.Where(p => p.IsRequiredForCli).ToList();
-        sb.AppendLine($"var validationFailures = new List<ValidationFailure?>();");
+        sb.AppendLine($"var requiredFailures = new List<ValidationFailure?>();");
 
         foreach (var requiredValue in requiredValues)
         {
             var propName = requiredValue.Name;
-            sb.AppendLine($"""validationFailures.Add(CheckRequiredValue<{requiredValue.TypeName}>("{propName}", builder.GetDataValue<{requiredValue.TypeName}>((typeof({commandInfo.Name}), "{propName}"))));""");
+            sb.AppendLine($"AddRequiredFailureIfNeeded<{requiredValue.TypeName}>(requiredFailures, !typedDataValues.{propName}.IsSet, nameof({propName}));");
         }
 
         sb.AppendLines([
-            "return validationFailures",
+            "return requiredFailures",
             "          .Where(x => x is not null)",
             "          .Select(x => x!);"
             ]);
 
+        sb.CloseMethod();
+    }
+
+    private static void CreateDataValues(StringBuilderWrapper sb, CommandInfo commandInfo)
+    {
+        sb.OpenMethod($"""protected override DataValues CreateDataValues()""");
+        sb.AppendLine($"return new {commandInfo.Name}DataValues();");
         sb.CloseMethod();
     }
 }

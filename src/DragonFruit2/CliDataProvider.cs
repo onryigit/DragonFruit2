@@ -1,6 +1,7 @@
 ﻿using DragonFruit2.Validators;
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using System.ComponentModel;
 
 namespace DragonFruit2;
 
@@ -51,7 +52,7 @@ public class CliDataProvider<TRootArgs> : DataProvider, IActiveArgsBuilderProvid
 
     public Dictionary<(Type argsType, string propertyName), Symbol> LookupSymbol { get; set; } = [];
 
-    public override bool TryGetValue<TValue>((Type argsType, string propertyName) key,out DataValue<TValue>? dataValue)
+    public override bool TryGetValue<TValue>((Type argsType, string propertyName) key, DataValue<TValue> dataValue)
     {
         if (RootCommand is null) throw new ArgumentNullException(nameof(RootCommand));
         if (InputArgs is null) throw new ArgumentNullException(nameof(InputArgs));
@@ -64,45 +65,52 @@ public class CliDataProvider<TRootArgs> : DataProvider, IActiveArgsBuilderProvid
             if (symbolResult is not null)
             {
                 // Symbol was found, value may or may not have been provided
-                dataValue = GetValue(ParseResult, symbol, this);
-                return dataValue is not null;
+                return SetDataValueIfProvided(ParseResult, symbol, this, dataValue);
             }
         }
         dataValue = null;
         return false;
 
-        static DataValue<TValue>? GetValue(ParseResult parseResult, Symbol symbol, DataProvider dataProvider)
+        static bool SetDataValueIfProvided(ParseResult parseResult, Symbol symbol, DataProvider dataProvider, DataValue<TValue> dataValue)
         {
             var symbolResult = parseResult.GetResult(symbol);
-            if (symbolResult is null) return null;
+            if (symbolResult is null) return false;
 
             var resultFound = false;
-            TValue? value = default;
 
             if (symbolResult.Tokens.Any())
             {
                 // Except for Boolean switches, do not use default values, but only those specified via tokens
                 resultFound = true;
-                value = symbol switch
+                TValue? value = symbol switch
                 {
                     Argument argument => parseResult.GetValue<TValue>(argument.Name),
                     Option option => parseResult.GetValue<TValue>(option.Name),
                     _ => throw new InvalidOperationException("Unsupported symbol type")
                 };
+                if (value is not null)
+                {
+                    dataValue.SetValue(value, dataProvider);
+                    return true;
+                }
             }
-            else if (symbolResult is OptionResult optionResult && optionResult.Option.ValueType == typeof(bool))
+            else if ((typeof(TValue) == typeof( bool) || typeof(TValue) == typeof( bool?)) 
+                   && symbolResult is OptionResult optionResult
+                   && optionResult.Option.ValueType == typeof(bool))
             {
                 // If the user specified the option, use the default value, which is provided by GetValue
                 if (optionResult.IdentifierTokenCount > 0)
                 {
-                    resultFound = true;
-                    value = parseResult.GetValue<TValue>(optionResult.Option.Name);
+                    var defaultValueAsObject = optionResult.Option.GetDefaultValue();
+                    // Had to cast to TValue to avoid compiler errors
+                    if (defaultValueAsObject is bool && defaultValueAsObject is TValue defaultValue)
+                    {
+                        dataValue.SetValue(defaultValue, dataProvider);
+                        return true;
+                    }
                 }
             }
-
-            return resultFound
-                ? DataValue<TValue>.Create(value, dataProvider)
-                : null;
+            return false;
         }
     }
 
