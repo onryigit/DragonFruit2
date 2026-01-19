@@ -184,9 +184,9 @@ public partial class MyArgs : IArgs<MyArgs>
     {
         public override void SetDataValues(DataProvider dataProvider)
         {
-            dataProvider.SetDataValue((typeof(MyArgs), nameof(Name)), Name);
-            dataProvider.SetDataValue((typeof(MyArgs), nameof(Age)), Age);
-            dataProvider.SetDataValue((typeof(MyArgs), nameof(Greeting)), Greeting);
+            dataProvider.TrySetDataValue((typeof(MyArgs), nameof(Name)), Name);
+            dataProvider.TrySetDataValue((typeof(MyArgs), nameof(Age)), Age);
+            dataProvider.TrySetDataValue((typeof(MyArgs), nameof(Greeting)), Greeting);
         }
 
         private Type argsType = typeof(MyArgs);

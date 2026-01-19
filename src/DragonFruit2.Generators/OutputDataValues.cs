@@ -26,7 +26,7 @@ internal class OutputDataValues
         sb.OpenMethod($"public override void SetDataValues(DataProvider dataProvider)");
         foreach (var propInfo in commandInfo.SelfAndAncestorPropInfos)
         {
-            sb.AppendLine($"dataProvider.SetDataValue((typeof({propInfo.ContainingTypeName}), nameof({propInfo.Name})), {propInfo.Name});");
+            sb.AppendLine($"dataProvider.TrySetDataValue((typeof({propInfo.ContainingTypeName}), nameof({propInfo.Name})), {propInfo.Name});");
         }
         sb.CloseMethod();
     }
