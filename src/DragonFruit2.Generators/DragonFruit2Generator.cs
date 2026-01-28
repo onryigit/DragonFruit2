@@ -1,45 +1,45 @@
-using DragonFruit2.GeneratorSupport;
 using Microsoft.CodeAnalysis;
 
-namespace DragonFruit2.Generators
+namespace DragonFruit2.Generators;
+
+[Generator]
+public sealed partial class DragonFruit2Generator : IIncrementalGenerator
 {
-    [Generator]
-    public sealed partial class DragonFruit2Generator : IIncrementalGenerator
+    private static readonly DragonFruit2Builder builder = new();
+
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        private static readonly DragonFruit2Builder builder = new();
+        var rawCommandInfos = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => builder.InitialFilter(node),
+                transform: static (ctx, _) => builder.Transform(ctx))
+            .WithTrackingName("ParseArgsInvocations")
+            .Where(static s => s is not null)
+            .Select(static (s, _) => s!) // Quiet nullability warning
+            .Collect()
+            .WithTrackingName(TrackingNames.Extract);
 
-        public void Initialize(IncrementalGeneratorInitializationContext context)
+        var commandInfos = rawCommandInfos
+            .Select((infos, ctx) => builder.BindParents(infos))
+            .WithTrackingName(TrackingNames.BindParents);
+
+        var allCommandInfos = commandInfos
+            .SelectMany(static (collected, _) => collected.SelectMany(commandInfo => builder.GetSelfAndDescendants(commandInfo)))
+            .WithTrackingName(TrackingNames.BuildHierarchy);
+
+        var collectedAllCommandInfos = allCommandInfos.Collect();
+
+        context.RegisterSourceOutput(collectedAllCommandInfos,
+                static (spc, cmdInfos) =>
+                {
+                    builder.OutputCliSource(spc, cmdInfos);
+                });
+
+        context.RegisterSourceOutput(allCommandInfos,
+            static (spc, collected) =>
         {
-            var rawCommandInfos = context.SyntaxProvider
-                .CreateSyntaxProvider(
-                    predicate: static (node, _) => builder.InitialFilter(node),
-                    transform: static (ctx, _) => builder.Transform(ctx))
-                .WithTrackingName("ParseArgsInvocations")
-                .Where(static s => s is not null)
-                .Select(static (s, _) => s!) // Quiet nullability warning
-                .Collect();
-
-            var commandInfos = rawCommandInfos.Select((infos, ctx) => builder.BindParents(infos));
-
-            var allCommandInfos = commandInfos
-                .SelectMany(static (collected, _) => collected.SelectMany(commandInfo => builder.GetSelfAndDescendants(commandInfo)))
-                .WithTrackingName("AllCommandInfos");
-
-            var collectedAllCommandInfos = allCommandInfos.Collect();
-
-            context.RegisterSourceOutput(collectedAllCommandInfos,
-                    static (spc, cmdInfos) =>
-                    {
-                        builder.OutputCliSource(spc, cmdInfos);
-                    });
-
-            context.RegisterSourceOutput(allCommandInfos,
-                static (spc, collected) =>
-            {
-                builder.OutputSource(spc, collected);
-            });
-        }
-
+            builder.OutputSource(spc, collected);
+        });
     }
 
 }

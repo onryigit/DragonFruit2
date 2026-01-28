@@ -17,6 +17,7 @@ internal static class OutputArgsBuilder
 
         sb.CloseClass();
     }
+
     internal static void OpenClass(CommandInfo commandInfo, StringBuilderWrapper sb)
     {
         sb.AppendLine();
@@ -177,7 +178,7 @@ internal static class OutputArgsBuilder
 
     private static void CreateDataValues(StringBuilderWrapper sb, CommandInfo commandInfo)
     {
-        sb.OpenMethod($"""protected override DataValues CreateDataValues()""");
+        sb.OpenMethod($"""protected override DataValues<TRootArgs> CreateDataValues()""");
         sb.AppendLine($"return new {commandInfo.Name}DataValues();");
         sb.CloseMethod();
     }

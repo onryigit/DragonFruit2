@@ -7,24 +7,23 @@ public abstract class Builder<TRootArgs>
 {
     protected abstract ArgsBuilder<TRootArgs> GetRootArgsBuilder();
 
-    protected Builder(string[] commandLineArguments, DragonFruit2Configuration? configuration = null)
+    protected Builder(DragonFruit2Configuration? configuration = null)
     {
-        CommandLineArguments = commandLineArguments ?? Environment.GetCommandLineArgs().Skip(1).ToArray();
         AddDataProvider(new CliDataProvider<TRootArgs>(this));
         AddDataProvider(new DefaultDataProvider<TRootArgs>(this));
         Configuration = configuration;
     }
 
-    public string[] CommandLineArguments { get; }
+    public string[]? CommandLineArguments { get; protected set; }
 
-    public List<DataProvider> DataProviders { get; } = [];
+    public List<DataProvider<TRootArgs>> DataProviders { get; } = [];
     public DragonFruit2Configuration? Configuration { get; }
 
     public TDataProvider GetDataProvider<TDataProvider>()
-            where TDataProvider : DataProvider
+            where TDataProvider : DataProvider<TRootArgs>
         => DataProviders.OfType<TDataProvider>().FirstOrDefault();
 
-    public void AddDataProvider(DataProvider provider, int position = int.MaxValue)
+    public void AddDataProvider(DataProvider<TRootArgs> provider, int position = int.MaxValue)
     {
         // TODO: Should we protect against multiple entries of the same provider? The same provider type? (might be scenarios for that) Have an "allow multiples" trait on the provider? (How would we do that in Framework?) Have each provider build a key that could differentiate?
         if (position < int.MaxValue)
@@ -50,6 +49,7 @@ public abstract class Builder<TRootArgs>
 
     public Result<TRootArgs> ParseArgs(string[] args)
     {
+        CommandLineArguments = args;
         GetRootArgsBuilder().Initialize(this);
 
         var cliDataProvider = DataProviders.OfType<IActiveArgsBuilderProvider<TRootArgs>>().FirstOrDefault()
@@ -69,8 +69,8 @@ public class Builder<TRootArgs, TRootArgsBuilder> : Builder<TRootArgs>
 {
     private TRootArgsBuilder argsBuilder;
 
-    public Builder(string[] args)
-        : base(args)
+    public Builder(DragonFruit2Configuration? configuration = null)
+        : base(configuration)
     {
         argsBuilder = new TRootArgsBuilder()
         {
@@ -83,11 +83,6 @@ public class Builder<TRootArgs, TRootArgsBuilder> : Builder<TRootArgs>
         return argsBuilder;
     }
 
-
-    public Builder(string[] commandLineArguments, DragonFruit2Configuration? configuration = null)
-        : base(commandLineArguments, configuration)
-    {
-    }
 }
 
 

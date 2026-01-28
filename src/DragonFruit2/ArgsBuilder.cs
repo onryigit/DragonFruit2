@@ -24,7 +24,7 @@ public abstract class ArgsBuilder<TRootArgs> : ArgsBuilder
     public abstract Command InitializeCli(Builder<TRootArgs> builder, CliDataProvider<TRootArgs>? cliDataProvider);
     protected abstract TRootArgs CreateInstance(DataValues dataValues);
     protected abstract IEnumerable<ValidationFailure> CheckRequiredValues(DataValues dataValues);
-    protected abstract DataValues CreateDataValues();
+    protected abstract DataValues<TRootArgs> CreateDataValues();
 
     public Builder<TRootArgs>? Builder
     {

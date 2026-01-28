@@ -174,15 +174,15 @@ public partial class MyArgs : IArgs<MyArgs>
                     .Select(x => x!);
         }
 
-        protected override DataValues CreateDataValues()
+        protected override DataValues<MyArgs> CreateDataValues()
             => new MyArgsDataValues();
     }
 
 
-
-    public class MyArgsDataValues : DataValues
+    // Generation Note: MyArgs in the following class is TRootArgs, except for the private srgsType.
+    public class MyArgsDataValues : DataValues<MyArgs>
     {
-        public override void SetDataValues(DataProvider dataProvider)
+        public override void SetDataValues(DataProvider<MyArgs> dataProvider)
         {
             dataProvider.TrySetDataValue((typeof(MyArgs), nameof(Name)), Name);
             dataProvider.TrySetDataValue((typeof(MyArgs), nameof(Age)), Age);

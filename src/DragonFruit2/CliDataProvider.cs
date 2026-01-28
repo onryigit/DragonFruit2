@@ -5,15 +5,14 @@ using System.ComponentModel;
 
 namespace DragonFruit2;
 
-public class CliDataProvider<TRootArgs> : DataProvider, IActiveArgsBuilderProvider<TRootArgs>
+public class CliDataProvider<TRootArgs> : DataProvider<TRootArgs>, IActiveArgsBuilderProvider<TRootArgs>
     where TRootArgs : class, IArgs<TRootArgs> 
 {
     public CliDataProvider(Builder<TRootArgs> builder) 
-    {
-        InputArgs = builder.CommandLineArguments;
-    }
+        : base(builder)
+    { }
 
-    public string[]? InputArgs { get; }
+    public string[]? InputArgs => Builder.CommandLineArguments;
 
     public (IEnumerable<ValidationFailure>? failures, ArgsBuilder<TRootArgs>? builder) GetActiveArgsBuilder()
     {
@@ -71,7 +70,7 @@ public class CliDataProvider<TRootArgs> : DataProvider, IActiveArgsBuilderProvid
         dataValue = null;
         return false;
 
-        static bool SetDataValueIfProvided(ParseResult parseResult, Symbol symbol, DataProvider dataProvider, DataValue<TValue> dataValue)
+        static bool SetDataValueIfProvided(ParseResult parseResult, Symbol symbol, DataProvider<TRootArgs> dataProvider, DataValue<TValue> dataValue)
         {
             var symbolResult = parseResult.GetResult(symbol);
             if (symbolResult is null) return false;

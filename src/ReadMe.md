@@ -1,0 +1,5 @@
+# Integration test strategy for this project
+
+Unit testing of DragonFruit2 itself requires a project that is generated or in the form generated. If a static project is used, it will need to be updated as DragonFruit2 gnereation changes - error prone and tedious. Instead this project is a "normal" CLI project which code is generated for. Unit tests are then run against the generated code to ensure proper DragonFruit functionality. Multiple of these projects may be created. This on is named "Simple" because it will not contain subcommands, nor are advanced uses of DataProviders and other features expected. Exercising defaults, configuration and vaidation are expected.
+
+Because of the complexity of this approach, it feels inherently in the integration test space, even though it is testing DragonFruit2 functionality directly in a unit test manner.

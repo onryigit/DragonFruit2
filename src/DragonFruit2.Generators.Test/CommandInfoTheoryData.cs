@@ -1,5 +1,4 @@
 ﻿using DragonFruit2.GeneratorSupport;
-using Xunit;
 
 namespace DragonFruit2.Generators.Test;
 

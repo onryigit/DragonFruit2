@@ -11,7 +11,7 @@ public class OutputCli
     internal static string GetSource(IEnumerable<CommandInfo> commandInfos)
     {
         var commandInfo = commandInfos
-                .Single(c => c.ParentCommandInfo == null);
+                .First(c => c.ParentCommandInfo == null);
         var sb = new StringBuilderWrapper();
         FileOpening(sb, commandInfo.CliNamespaceName, commandInfo.NamespaceName);
         sb.OpenNamespace(commandInfo.CliNamespaceName);

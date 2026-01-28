@@ -4,6 +4,21 @@ using SampleConsoleApp;
 public class Cli
 {
     /// <summary>
+    /// Advanced: Creates a Builder, which can be configured, the System.CommandLine API can be accessed, 
+    /// and which can be reused (especially helpful in testing). 
+    /// </summary>
+    /// <remarks>
+    /// You may need to build after editing this line.
+    /// </remarks>
+    /// <typeparam name="TRootArgs">The type containing the CLI definition</typeparam>
+    /// <returns>A Result instance containing the hydrated args or error messages.</returns>
+    public static Builder<MyArgs> CreateBuilder()
+    {
+        // TRootArgs is not used, but is retained, along with it's name to reduce confusion at the call site
+        return new Builder<MyArgs, MyArgs.MyArgsBuilder>();
+    }
+
+    /// <summary>
     /// Parses CLI arguments to fill the specified args type. 
     /// </summary>
     /// <remarks>
@@ -12,13 +27,13 @@ public class Cli
     /// You may need to build after editing this line.
     /// </remarks>
     /// <typeparam name="TRootArgs">The type containing the CLI definition</typeparam>
-    /// <param name="args">Optionaly pass the commandline args</param>
+    /// <param name="args">Optionaly pass the commandline args, if it is not passed, it will be retrieved from System.Environment.</param>
     /// <returns>A Result instance containing the hydrated args or error messages.</returns>
     public static Result<MyArgs> ParseArgs<TRootArgs>(string[]? args = null)
         where TRootArgs : MyArgs, IArgs<TRootArgs>
     {
         // TRootArgs is not used, but is retained, along with it's name to reduce confusion at the call site
-        return new Builder<MyArgs, MyArgs.MyArgsBuilder>(args).ParseArgs(args);
+        return new Builder<MyArgs, MyArgs.MyArgsBuilder>().ParseArgs(args);
     }
 
     /// <summary>

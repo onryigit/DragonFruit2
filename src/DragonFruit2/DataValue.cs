@@ -2,6 +2,7 @@
 
 public record class DataValue<TValue> : IDataValue
 {
+    // TODO: Replace `argsType` with `key`
     public static DataValue<TValue> Create(string name, Type argsType)
         => new(name, argsType);
 
