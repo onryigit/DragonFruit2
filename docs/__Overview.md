@@ -2,20 +2,20 @@
 
 (These are aspirational docs to communicate during development and evolve into final docs. Features described may not be implemented now or ever.)
 
-One goal of DragonFruit2 is to use System.CommandLine using natural C# features, reducing of eliminating the need to learn the syntax of the library. System.CommandLine is a powerful Posix parser that provides consistent Posix rules across the ecosystem. DragonFruit2 makes it very simple to use.
+One goal of DragonFruit2 is to use System.CommandLine using natural C# features, reducing of eliminating the need to learn the syntax of the library. System.CommandLine is a powerful Posix parser that provides consistent Posix rules across the ecosystem. DragonFruit2 makes it very simple to use, only becoming more complex when you need to do more complex things.
 
-Another goal of DragonFruit2 is to provde a extensibility platform for future evolution in areas like help, validation, transforms, and prompting. 
+Another goal of DragonFruit2 is to provide a extensibility platform for future evolution in areas like help, validation, transforms, prompting, and execution.
 
 The three cohorts under consideration:
 
 - Beginners to programming
   - This cohort inspires limiting the concepts that are required for success
 - Programmers that want to write a quick and dirty app
-  - This cohort inspires it being the simplest way to create a console app
+  - This cohort includes extremely sophisticated programmers and inspires DragonFruit2 being the simplest way to create a console app
 - Library authors with CLIs of moderate complexity
   - This cohort inspires advanced features such as cross-property validation, transforms, and data providers
 - (Aspirational) The .NET CLI
-  - This cohort will be essential to us understnading the limitations of DragonFruit2
+  - This cohort will be essential to us understanding the limitations of DragonFruit2
 - Extension authors
   - This cohort inspires a rich extensibility story and Spectre may be important to understanding what kind of extensibility makes sense
 
